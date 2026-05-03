@@ -5,25 +5,25 @@ import { GDPR_001 } from "@/lib/rules/gdpr";
 
 import { runReconPass } from "./recon";
 
-const callOpenRouterMock = vi.fn();
-vi.mock("@/lib/llm/openrouter", () => ({
-  callOpenRouter: (...args: unknown[]) => callOpenRouterMock(...args),
+const callAnthropicMock = vi.fn();
+vi.mock("@/lib/llm/anthropic", () => ({
+  callAnthropic: (...args: unknown[]) => callAnthropicMock(...args),
 }));
 
 beforeEach(() => {
-  callOpenRouterMock.mockReset();
+  callAnthropicMock.mockReset();
 });
 
 describe("runReconPass", () => {
   it("returns the model's ordered top paths, filtered to the input set", async () => {
-    callOpenRouterMock.mockResolvedValue({
+    callAnthropicMock.mockResolvedValue({
       text: JSON.stringify({ top_paths: ["src/auth.ts", "src/hallucinated.ts", "README.md"] }),
       inputTokens: 100,
       outputTokens: 20,
       durationMs: 50,
       requestId: "r-1",
-      model: "google/gemma-4-31b-it:free",
-      provider: "openrouter",
+      model: "claude-sonnet-4-6",
+      provider: "anthropic",
     });
 
     const result = await runReconPass(
@@ -36,19 +36,19 @@ describe("runReconPass", () => {
     );
 
     expect(result.topPaths).toEqual(["src/auth.ts", "README.md"]);
-    expect(callOpenRouterMock).toHaveBeenCalledTimes(1);
+    expect(callAnthropicMock).toHaveBeenCalledTimes(1);
   });
 
   it("retries once when the response is unparseable, then succeeds", async () => {
-    callOpenRouterMock
+    callAnthropicMock
       .mockResolvedValueOnce({
         text: "not json at all",
         inputTokens: 50,
         outputTokens: 5,
         durationMs: 30,
         requestId: "r-1",
-        model: "google/gemma-4-31b-it:free",
-        provider: "openrouter",
+        model: "claude-sonnet-4-6",
+        provider: "anthropic",
       })
       .mockResolvedValueOnce({
         text: JSON.stringify({ top_paths: ["a.ts"] }),
@@ -56,24 +56,24 @@ describe("runReconPass", () => {
         outputTokens: 5,
         durationMs: 30,
         requestId: "r-2",
-        model: "google/gemma-4-31b-it:free",
-        provider: "openrouter",
+        model: "claude-sonnet-4-6",
+        provider: "anthropic",
       });
 
     const result = await runReconPass([{ path: "a.ts", size: 1, content: "x" }], [GDPR_001]);
     expect(result.topPaths).toEqual(["a.ts"]);
-    expect(callOpenRouterMock).toHaveBeenCalledTimes(2);
+    expect(callAnthropicMock).toHaveBeenCalledTimes(2);
   });
 
   it("propagates the parse error after a second failure", async () => {
-    callOpenRouterMock.mockResolvedValue({
+    callAnthropicMock.mockResolvedValue({
       text: "garbage",
       inputTokens: 0,
       outputTokens: 0,
       durationMs: 0,
       requestId: "r",
-      model: "google/gemma-4-31b-it:free",
-      provider: "openrouter",
+      model: "claude-sonnet-4-6",
+      provider: "anthropic",
     });
 
     await expect(
@@ -84,6 +84,6 @@ describe("runReconPass", () => {
   it("returns an empty list when given no files", async () => {
     const result = await runReconPass([], [GDPR_001]);
     expect(result.topPaths).toEqual([]);
-    expect(callOpenRouterMock).not.toHaveBeenCalled();
+    expect(callAnthropicMock).not.toHaveBeenCalled();
   });
 });

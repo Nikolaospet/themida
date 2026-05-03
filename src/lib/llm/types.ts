@@ -26,8 +26,8 @@ export type LlmCallResult = {
   readonly provider: Provider;
 };
 
-export class OpenRouterRateLimitError extends Error {
-  override readonly name = "OpenRouterRateLimitError";
+export class LlmRateLimitError extends Error {
+  override readonly name = "LlmRateLimitError";
   readonly retryAfterMs: number;
 
   constructor(message: string, retryAfterMs: number) {
@@ -36,8 +36,8 @@ export class OpenRouterRateLimitError extends Error {
   }
 }
 
-export class OpenRouterServerError extends Error {
-  override readonly name = "OpenRouterServerError";
+export class LlmServerError extends Error {
+  override readonly name = "LlmServerError";
   readonly status: number;
 
   constructor(message: string, status: number) {
@@ -46,8 +46,8 @@ export class OpenRouterServerError extends Error {
   }
 }
 
-export class OpenRouterContractError extends Error {
-  override readonly name = "OpenRouterContractError";
+export class LlmContractError extends Error {
+  override readonly name = "LlmContractError";
   constructor(message: string) {
     super(message);
   }

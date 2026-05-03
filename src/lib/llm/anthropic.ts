@@ -6,25 +6,35 @@ import { childLogger } from "@/lib/logger";
 import { type Model, recordLlmCall } from "@/lib/observability/cost-tracker";
 
 import type { LlmCallOptions, LlmCallResult, LlmMessage } from "./types";
-import { OpenRouterContractError, OpenRouterRateLimitError, OpenRouterServerError } from "./types";
+import { LlmContractError, LlmRateLimitError, LlmServerError } from "./types";
 
-const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
+const ENDPOINT = "https://api.anthropic.com/v1/messages";
+const ANTHROPIC_VERSION = "2023-06-01";
 const MAX_ATTEMPTS = 3;
 const BASE_BACKOFF_MS = 1_000;
 
-const log = childLogger({ component: "openrouter" });
+const log = childLogger({ component: "anthropic" });
 
-export async function callOpenRouter(
+/**
+ * Calls the Anthropic Messages API.
+ *
+ * Differences from OpenAI-style chat completions:
+ * - System messages collapse into a top-level `system` field (string).
+ * - Response shape: `content[0].text` and `usage.input_tokens` / `usage.output_tokens`.
+ * - Headers: `x-api-key` + `anthropic-version`, no Bearer token.
+ */
+export async function callAnthropic(
   messages: readonly LlmMessage[],
   options: LlmCallOptions,
 ): Promise<LlmCallResult> {
-  const model = serverEnv.OPENROUTER_MODEL as Model;
+  const model = serverEnv.ANTHROPIC_MODEL as Model;
+  const { system, userMessages } = splitSystemAndMessages(messages);
   const body = JSON.stringify({
     model,
-    messages,
+    system,
+    messages: userMessages,
     temperature: options.temperature ?? 0,
     max_tokens: options.maxTokens ?? 4096,
-    response_format: { type: "json_object" },
   });
 
   let lastError: unknown;
@@ -34,28 +44,21 @@ export async function callOpenRouter(
       const response = await globalThis.fetch(ENDPOINT, {
         method: "POST",
         headers: {
-          authorization: `Bearer ${serverEnv.OPENROUTER_API_KEY}`,
+          "x-api-key": serverEnv.ANTHROPIC_API_KEY,
+          "anthropic-version": ANTHROPIC_VERSION,
           "content-type": "application/json",
-          "x-title": "Themida",
         },
         body,
         signal: options.abortSignal ?? null,
       });
       const durationMs = Date.now() - startedAt;
-      const requestId =
-        response.headers.get("x-request-id") ?? response.headers.get("openrouter-request-id") ?? "";
+      const requestId = response.headers.get("request-id") ?? "";
 
       if (response.status === 429) {
         const retryAfterMs = parseRetryAfter(response.headers.get("retry-after"));
-        await recordFailure({
-          options,
-          model,
-          durationMs,
-          requestId,
-          status: 429,
-        });
-        lastError = new OpenRouterRateLimitError(
-          `OpenRouter rate-limited (attempt ${attempt}/${MAX_ATTEMPTS})`,
+        await recordFailure({ options, model, durationMs, requestId, status: 429 });
+        lastError = new LlmRateLimitError(
+          `Anthropic rate-limited (attempt ${attempt}/${MAX_ATTEMPTS})`,
           retryAfterMs,
         );
         if (attempt === MAX_ATTEMPTS) throw lastError;
@@ -65,8 +68,8 @@ export async function callOpenRouter(
 
       if (response.status >= 500) {
         await recordFailure({ options, model, durationMs, requestId, status: response.status });
-        lastError = new OpenRouterServerError(
-          `OpenRouter ${response.status} (attempt ${attempt}/${MAX_ATTEMPTS})`,
+        lastError = new LlmServerError(
+          `Anthropic ${response.status} (attempt ${attempt}/${MAX_ATTEMPTS})`,
           response.status,
         );
         if (attempt === MAX_ATTEMPTS) throw lastError;
@@ -77,8 +80,8 @@ export async function callOpenRouter(
       if (!response.ok) {
         await recordFailure({ options, model, durationMs, requestId, status: response.status });
         const text = await response.text();
-        throw new OpenRouterServerError(
-          `OpenRouter ${response.status}: ${text.slice(0, 200)}`,
+        throw new LlmServerError(
+          `Anthropic ${response.status}: ${text.slice(0, 200)}`,
           response.status,
         );
       }
@@ -86,13 +89,18 @@ export async function callOpenRouter(
       const payload = (await response.json()) as {
         id?: string;
         model?: string;
-        choices?: Array<{ message?: { content?: string } }>;
-        usage?: { prompt_tokens?: number; completion_tokens?: number };
+        content?: Array<{ type?: string; text?: string }>;
+        usage?: {
+          input_tokens?: number;
+          output_tokens?: number;
+          cache_read_input_tokens?: number;
+        };
       };
 
-      const text = payload.choices?.[0]?.message?.content;
-      const inputTokens = payload.usage?.prompt_tokens;
-      const outputTokens = payload.usage?.completion_tokens;
+      const text = firstTextBlock(payload.content);
+      const inputTokens = payload.usage?.input_tokens;
+      const outputTokens = payload.usage?.output_tokens;
+      const cachedTokens = payload.usage?.cache_read_input_tokens ?? 0;
       const responseModel = payload.model ?? model;
       const responseId = payload.id ?? requestId;
 
@@ -102,19 +110,19 @@ export async function callOpenRouter(
         typeof outputTokens !== "number"
       ) {
         await recordFailure({ options, model, durationMs, requestId: responseId, status: 200 });
-        throw new OpenRouterContractError(
-          `OpenRouter response missing text/usage (model=${responseModel}, id=${responseId})`,
+        throw new LlmContractError(
+          `Anthropic response missing text/usage (model=${responseModel}, id=${responseId})`,
         );
       }
 
       await recordLlmCall({
         scanId: options.scanId ?? null,
         userId: options.userId ?? null,
-        provider: "openrouter",
+        provider: "anthropic",
         model,
         pass: options.pass,
         inputTokens,
-        cachedTokens: 0,
+        cachedTokens,
         outputTokens,
         durationMs,
         requestId: responseId || null,
@@ -127,26 +135,50 @@ export async function callOpenRouter(
         durationMs,
         requestId: responseId,
         model: responseModel,
-        provider: "openrouter",
+        provider: "anthropic",
       };
     } catch (err) {
-      // Already-typed errors thrown above bubble up after recordFailure.
       if (
-        err instanceof OpenRouterRateLimitError ||
-        err instanceof OpenRouterServerError ||
-        err instanceof OpenRouterContractError
+        err instanceof LlmRateLimitError ||
+        err instanceof LlmServerError ||
+        err instanceof LlmContractError
       ) {
         throw err;
       }
-      // Network/abort failures: retry like a 5xx.
-      log.warn({ err, attempt }, "openrouter network failure");
+      log.warn({ err, attempt }, "anthropic network failure");
       lastError = err;
       if (attempt === MAX_ATTEMPTS) throw err;
       await sleepWithBackoff(attempt, null);
     }
   }
 
-  throw lastError ?? new Error("callOpenRouter: exhausted attempts without throwing");
+  throw lastError ?? new Error("callAnthropic: exhausted attempts without throwing");
+}
+
+function splitSystemAndMessages(messages: readonly LlmMessage[]): {
+  system: string;
+  userMessages: Array<{ role: "user" | "assistant"; content: string }>;
+} {
+  const systemParts: string[] = [];
+  const userMessages: Array<{ role: "user" | "assistant"; content: string }> = [];
+  for (const m of messages) {
+    if (m.role === "system") {
+      systemParts.push(m.content);
+    } else {
+      userMessages.push({ role: "user", content: m.content });
+    }
+  }
+  return { system: systemParts.join("\n\n"), userMessages };
+}
+
+function firstTextBlock(
+  content: Array<{ type?: string; text?: string }> | undefined,
+): string | undefined {
+  if (!content) return undefined;
+  for (const block of content) {
+    if (block.type === "text" && typeof block.text === "string") return block.text;
+  }
+  return undefined;
 }
 
 function parseRetryAfter(value: string | null): number {
@@ -176,12 +208,12 @@ async function recordFailure(args: {
       requestId: args.requestId,
       pass: args.options.pass,
     },
-    "openrouter call failed; recording zero-token row",
+    "anthropic call failed; recording zero-token row",
   );
   await recordLlmCall({
     scanId: args.options.scanId ?? null,
     userId: args.options.userId ?? null,
-    provider: "openrouter",
+    provider: "anthropic",
     model: args.model,
     pass: args.options.pass,
     inputTokens: 0,

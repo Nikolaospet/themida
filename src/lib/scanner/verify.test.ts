@@ -6,13 +6,13 @@ import { GDPR_001 } from "@/lib/rules/gdpr";
 import type { RawFinding } from "./findings";
 import { runVerificationPass } from "./verify";
 
-const callOpenRouterMock = vi.fn();
-vi.mock("@/lib/llm/openrouter", () => ({
-  callOpenRouter: (...args: unknown[]) => callOpenRouterMock(...args),
+const callAnthropicMock = vi.fn();
+vi.mock("@/lib/llm/anthropic", () => ({
+  callAnthropic: (...args: unknown[]) => callAnthropicMock(...args),
 }));
 
 beforeEach(() => {
-  callOpenRouterMock.mockReset();
+  callAnthropicMock.mockReset();
 });
 
 const finding = (i: number): RawFinding => ({
@@ -39,14 +39,14 @@ function verificationResponse(verified: RawFinding[]) {
     outputTokens: 30,
     durationMs: 40,
     requestId: "r",
-    model: "google/gemma-4-31b-it:free",
-    provider: "openrouter",
+    model: "claude-sonnet-4-6",
+    provider: "anthropic",
   };
 }
 
 describe("runVerificationPass", () => {
   it("returns the verified findings only", async () => {
-    callOpenRouterMock.mockResolvedValueOnce(verificationResponse([finding(1)]));
+    callAnthropicMock.mockResolvedValueOnce(verificationResponse([finding(1)]));
     const verified = await runVerificationPass([finding(1), finding(2)], [GDPR_001]);
     expect(verified).toHaveLength(1);
     expect(verified[0]?.file_path).toBe("src/1.ts");
@@ -55,30 +55,30 @@ describe("runVerificationPass", () => {
   it("does not call the LLM when given no findings", async () => {
     const verified = await runVerificationPass([], [GDPR_001]);
     expect(verified).toEqual([]);
-    expect(callOpenRouterMock).not.toHaveBeenCalled();
+    expect(callAnthropicMock).not.toHaveBeenCalled();
   });
 
   it("batches large finding lists into groups of 30", async () => {
     const findings = Array.from({ length: 65 }, (_, i) => finding(i));
-    callOpenRouterMock.mockImplementation(async () => verificationResponse(findings.slice(0, 30)));
+    callAnthropicMock.mockImplementation(async () => verificationResponse(findings.slice(0, 30)));
     await runVerificationPass(findings, [GDPR_001]);
-    expect(callOpenRouterMock).toHaveBeenCalledTimes(3); // 30 + 30 + 5
+    expect(callAnthropicMock).toHaveBeenCalledTimes(3); // 30 + 30 + 5
   });
 
   it("retries once on JSON parse failure", async () => {
-    callOpenRouterMock
+    callAnthropicMock
       .mockResolvedValueOnce({
         text: "garbage",
         inputTokens: 0,
         outputTokens: 0,
         durationMs: 0,
         requestId: "r",
-        model: "google/gemma-4-31b-it:free",
-        provider: "openrouter",
+        model: "claude-sonnet-4-6",
+        provider: "anthropic",
       })
       .mockResolvedValueOnce(verificationResponse([finding(1)]));
     const verified = await runVerificationPass([finding(1)], [GDPR_001]);
     expect(verified).toHaveLength(1);
-    expect(callOpenRouterMock).toHaveBeenCalledTimes(2);
+    expect(callAnthropicMock).toHaveBeenCalledTimes(2);
   });
 });
