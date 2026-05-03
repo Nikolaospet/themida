@@ -16,6 +16,12 @@ const serverSchema = z.object({
   TOKEN_ENCRYPTION_KEY: z
     .string()
     .regex(/^[0-9a-fA-F]{64}$/u, "TOKEN_ENCRYPTION_KEY must be 64 hex characters (32 bytes)"),
+  GITHUB_APP_ID: z.string().regex(/^\d+$/u, "GITHUB_APP_ID must be a numeric string"),
+  GITHUB_APP_SLUG: z.string().min(1),
+  GITHUB_APP_PRIVATE_KEY: z.string().min(1),
+  GITHUB_APP_INSTALL_STATE_SECRET: z
+    .string()
+    .regex(/^[0-9a-fA-F]{64}$/u, "GITHUB_APP_INSTALL_STATE_SECRET must be 64 hex characters"),
   SENTRY_ENVIRONMENT: z.enum(["development", "preview", "production"]).default("development"),
   SENTRY_AUTH_TOKEN: z.string().optional().default(""),
 });

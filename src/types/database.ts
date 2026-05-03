@@ -136,6 +136,50 @@ export type Database = {
           },
         ];
       };
+      github_installations: {
+        Row: {
+          account_id: number;
+          account_login: string;
+          account_type: string;
+          created_at: string;
+          id: string;
+          installation_id: number;
+          suspended_at: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          account_id: number;
+          account_login: string;
+          account_type: string;
+          created_at?: string;
+          id?: string;
+          installation_id: number;
+          suspended_at?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          account_id?: number;
+          account_login?: string;
+          account_type?: string;
+          created_at?: string;
+          id?: string;
+          installation_id?: number;
+          suspended_at?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "github_installations_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       issues: {
         Row: {
           code_snippet: string | null;
@@ -269,6 +313,7 @@ export type Database = {
           full_name: string;
           github_repo_id: number;
           id: string;
+          installation_id: number | null;
           last_scanned_at: string | null;
           name: string;
           owner: string;
@@ -281,6 +326,7 @@ export type Database = {
           full_name: string;
           github_repo_id: number;
           id?: string;
+          installation_id?: number | null;
           last_scanned_at?: string | null;
           name: string;
           owner: string;
@@ -293,6 +339,7 @@ export type Database = {
           full_name?: string;
           github_repo_id?: number;
           id?: string;
+          installation_id?: number | null;
           last_scanned_at?: string | null;
           name?: string;
           owner?: string;
@@ -300,6 +347,13 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "repos_installation_id_fkey";
+            columns: ["installation_id"];
+            isOneToOne: false;
+            referencedRelation: "github_installations";
+            referencedColumns: ["installation_id"];
+          },
           {
             foreignKeyName: "repos_user_id_fkey";
             columns: ["user_id"];

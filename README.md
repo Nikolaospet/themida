@@ -52,6 +52,10 @@ Open <http://localhost:3000>. Supabase Studio runs at <http://127.0.0.1:54323>.
 > **Requirements for the local stack:** Docker Desktop must be running.
 > The Supabase CLI provisions Postgres, GoTrue, Studio, etc., as containers.
 
+> **Connecting a repository** requires a registered GitHub App. Follow
+> [`docs/setup/github-app.md`](./docs/setup/github-app.md) once and
+> drop the resulting credentials into your `.env.local`.
+
 ## Scripts
 
 | Command             | Purpose                                |
