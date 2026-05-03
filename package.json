@@ -23,6 +23,7 @@
     "db:types": "supabase gen types typescript --local 2>/dev/null > src/types/database.ts",
     "test": "vitest run",
     "test:watch": "vitest",
+    "evals:run": "vitest run evals/runner.test.ts",
     "prepare": "husky"
   },
   "lint-staged": {

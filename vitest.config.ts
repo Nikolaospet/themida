@@ -15,10 +15,18 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx", "evals/**/*.test.ts"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
-      exclude: ["node_modules/", ".next/", "**/*.config.*", "**/*.d.ts", "vitest.setup.ts"],
+      exclude: [
+        "node_modules/",
+        ".next/",
+        "**/*.config.*",
+        "**/*.d.ts",
+        "vitest.setup.ts",
+        "evals/repos/**",
+      ],
     },
   },
 });

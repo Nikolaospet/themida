@@ -1,0 +1,17 @@
+{
+  "name": "005-mixed-violations",
+  "description": "Logs passwords (GDPR-002) and lets an AI decide loan approvals without human review (AI-ACT-002).",
+  "frameworks": ["gdpr", "eu-ai-act"],
+  "expected_findings": [
+    {
+      "rule_id": "GDPR-002",
+      "file_path": "src/auth/login.ts",
+      "line_number_approx": 5
+    },
+    {
+      "rule_id": "AI-ACT-002",
+      "file_path": "src/api/loan-decision.ts",
+      "line_number_approx": 12
+    }
+  ]
+}

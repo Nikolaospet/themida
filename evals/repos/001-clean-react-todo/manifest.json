@@ -1,0 +1,6 @@
+{
+  "name": "001-clean-react-todo",
+  "description": "Minimal React todo app — no compliance issues; serves as a true negative.",
+  "frameworks": ["gdpr", "eu-ai-act"],
+  "expected_findings": []
+}

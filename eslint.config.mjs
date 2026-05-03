@@ -35,6 +35,7 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "node_modules/**",
     "coverage/**",
+    "evals/repos/**",
   ]),
 ]);
 
