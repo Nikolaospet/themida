@@ -1,5 +1,5 @@
-import "server-only";
-
+// Server-only by transitive dependency on serverEnv. Omitting the explicit
+// marker keeps this module importable from CLI scripts.
 import { App } from "octokit";
 
 import { serverEnv } from "@/env";

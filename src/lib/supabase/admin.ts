@@ -1,5 +1,5 @@
-import "server-only";
-
+// Server-only by transitive dependency on serverEnv. Omitting the explicit
+// `server-only` marker keeps this module importable from CLI scripts.
 import { createClient } from "@supabase/supabase-js";
 
 import { clientEnv } from "@/env";

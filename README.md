@@ -142,6 +142,32 @@ detection lands in Phase 3b once the Claude integration is wired.
 
 Run the suite via `pnpm evals:run` (it is also part of `pnpm test`).
 
+## Repo file fetcher (Phase 1.6)
+
+`src/lib/github/fetcher.ts` enumerates a repo's files via the GitHub
+**Trees API** (one HTTP call) and pulls the bytes of a chosen subset
+in concurrency-limited batches via the **raw blob** endpoint. Repos
+larger than 5 K files are rejected for now — the tarball fallback
+ships in Phase 3c.
+
+Each fetched blob is gzipped and written to `public.repo_file_cache`
+keyed by `(repo_id, blob_sha)`. Re-scans only re-fetch blobs whose
+SHA has changed; for an unchanged repo the second scan reads
+exclusively from cache.
+
+To inspect the live numbers (file count, total bytes, token estimate,
+cache hit rate) on your most recently connected repo:
+
+```bash
+pnpm dev:fetch
+```
+
+The script is read-only against GitHub and writes only to
+`repo_file_cache`. It uses the service-role admin client, so it runs
+locally regardless of the authenticated session — but it requires that
+you've completed the GitHub App install flow at least once (otherwise
+no `repos` row exists for it to read).
+
 ## Contributing
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md).

@@ -306,6 +306,44 @@ export type Database = {
         };
         Relationships: [];
       };
+      repo_file_cache: {
+        Row: {
+          blob_sha: string;
+          cached_at: string;
+          content_compressed: string;
+          content_size: number;
+          file_path: string;
+          id: string;
+          repo_id: string;
+        };
+        Insert: {
+          blob_sha: string;
+          cached_at?: string;
+          content_compressed: string;
+          content_size: number;
+          file_path: string;
+          id?: string;
+          repo_id: string;
+        };
+        Update: {
+          blob_sha?: string;
+          cached_at?: string;
+          content_compressed?: string;
+          content_size?: number;
+          file_path?: string;
+          id?: string;
+          repo_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "repo_file_cache_repo_id_fkey";
+            columns: ["repo_id"];
+            isOneToOne: false;
+            referencedRelation: "repos";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       repos: {
         Row: {
           created_at: string;
