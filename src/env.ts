@@ -25,7 +25,20 @@ const clientSchema = z.object({
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: stringNonEmpty,
 });
 
-const isServer = typeof window === "undefined";
+export type ClientEnv = z.infer<typeof clientSchema>;
+export type ServerEnv = z.infer<typeof serverSchema>;
+
+const skipValidation =
+  process.env.SKIP_ENV_VALIDATION === "true" || process.env.SKIP_ENV_VALIDATION === "1";
+
+function parse<T extends z.ZodTypeAny>(schema: T, values: unknown, label: string): z.infer<T> {
+  const result = schema.safeParse(values);
+  if (!result.success) {
+    const formatted = JSON.stringify(z.treeifyError(result.error), null, 2);
+    throw new Error(`Invalid ${label} environment variables:\n${formatted}`);
+  }
+  return result.data;
+}
 
 const clientValues = {
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
@@ -34,18 +47,29 @@ const clientValues = {
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
 };
 
-function parse<T extends z.ZodTypeAny>(schema: T, values: unknown): z.infer<T> {
-  const result = schema.safeParse(values);
-  if (!result.success) {
-    const formatted = JSON.stringify(z.treeifyError(result.error), null, 2);
-    throw new Error(`Invalid environment variables:\n${formatted}`);
-  }
-  return result.data;
+// Lazy-validated proxies. Validation runs on first property access, never at
+// module load. This lets `next build` collect page metadata without all
+// runtime secrets present (Vercel injects them at deploy time, CI omits
+// them entirely). Set SKIP_ENV_VALIDATION=true to opt out completely.
+
+function makeLazyEnv<T extends z.ZodTypeAny>(
+  schema: T,
+  values: () => unknown,
+  label: string,
+): z.infer<T> {
+  let cache: z.infer<T> | undefined;
+  const stub = Object.create(null) as object;
+  const proxy = new Proxy(stub, {
+    get(_target, prop) {
+      if (skipValidation) {
+        return (values() as Record<string, unknown>)[prop as string];
+      }
+      cache ??= parse(schema, values(), label);
+      return (cache as Record<string, unknown>)[prop as string];
+    },
+  });
+  return proxy as z.infer<T>;
 }
 
-export const clientEnv = parse(clientSchema, clientValues);
-
-export const serverEnv = isServer ? parse(serverSchema, process.env) : (undefined as never);
-
-export type ClientEnv = z.infer<typeof clientSchema>;
-export type ServerEnv = z.infer<typeof serverSchema>;
+export const clientEnv = makeLazyEnv(clientSchema, () => clientValues, "client");
+export const serverEnv = makeLazyEnv(serverSchema, () => process.env, "server");
