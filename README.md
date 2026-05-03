@@ -37,11 +37,20 @@ pnpm install
 cp .env.example .env.local
 # fill in the required values
 
-# 3. Run the dev server
+# 3. Boot the local Supabase stack (Postgres + Auth + Studio)
+pnpm db:start
+
+# 4. Apply migrations
+pnpm db:reset
+
+# 5. Run the dev server
 pnpm dev
 ```
 
-Open <http://localhost:3000>.
+Open <http://localhost:3000>. Supabase Studio runs at <http://127.0.0.1:54323>.
+
+> **Requirements for the local stack:** Docker Desktop must be running.
+> The Supabase CLI provisions Postgres, GoTrue, Studio, etc., as containers.
 
 ## Scripts
 
@@ -58,15 +67,24 @@ Open <http://localhost:3000>.
 | `pnpm secretlint`   | Scan for secrets locally               |
 | `pnpm test`         | Run unit tests once                    |
 | `pnpm test:watch`   | Run unit tests in watch mode           |
+| `pnpm db:start`     | Boot local Supabase stack              |
+| `pnpm db:stop`      | Stop local Supabase stack              |
+| `pnpm db:reset`     | Drop + recreate local DB and re-apply migrations |
+| `pnpm db:types`     | Regenerate `src/types/database.ts` from local DB |
 
 ## Project structure
 
 ```
 themida/
 ├── src/
-│   ├── app/                Next.js App Router routes
-│   ├── lib/                Utilities, clients, scanner pipeline
-│   └── env.ts              Zod-validated env vars
+│   ├── app/                Next.js App Router routes (auth, dashboard, marketing)
+│   ├── lib/                Utilities, Supabase + crypto + scanner clients
+│   ├── types/              Generated DB types
+│   ├── env.ts              Zod-validated env vars (lazy)
+│   └── middleware.ts       Supabase session refresh
+├── supabase/
+│   ├── config.toml         Local stack config
+│   └── migrations/         SQL migrations (versioned)
 ├── public/                 Static assets
 ├── docs/adr/               Architecture decision records
 ├── .github/workflows/      CI: ci, codeql, gitleaks

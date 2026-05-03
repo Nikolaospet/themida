@@ -55,3 +55,6 @@ jobs:
         run: pnpm build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
+          # Real secrets are injected by the deployment platform; CI builds
+          # only need to verify that compilation succeeds.
+          SKIP_ENV_VALIDATION: "true"
