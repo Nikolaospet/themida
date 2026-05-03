@@ -7,6 +7,8 @@ const serverSchema = z.object({
 
   SUPABASE_SERVICE_ROLE_KEY: stringNonEmpty,
   ANTHROPIC_API_KEY: stringNonEmpty,
+  OPENROUTER_API_KEY: stringNonEmpty,
+  OPENROUTER_MODEL: stringNonEmpty.default("google/gemma-4-31b-it:free"),
   GITHUB_CLIENT_ID: stringNonEmpty,
   GITHUB_CLIENT_SECRET: stringNonEmpty,
   STRIPE_SECRET_KEY: stringNonEmpty,
