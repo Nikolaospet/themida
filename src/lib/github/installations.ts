@@ -1,5 +1,5 @@
-import "server-only";
-
+// Server-only by transitive dependency on app.ts. Omitting the explicit
+// marker keeps this module importable from CLI scripts.
 import { getAppOctokit, getInstallationOctokit } from "./app";
 
 export type AccessibleRepo = {
