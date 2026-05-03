@@ -28,6 +28,66 @@ export type Database = {
   };
   public: {
     Tables: {
+      claude_api_calls: {
+        Row: {
+          cached_tokens: number;
+          cost_cents: number;
+          created_at: string;
+          duration_ms: number | null;
+          id: string;
+          input_tokens: number;
+          model: string;
+          output_tokens: number;
+          pass: string;
+          request_id: string | null;
+          scan_id: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          cached_tokens?: number;
+          cost_cents: number;
+          created_at?: string;
+          duration_ms?: number | null;
+          id?: string;
+          input_tokens: number;
+          model: string;
+          output_tokens: number;
+          pass: string;
+          request_id?: string | null;
+          scan_id?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          cached_tokens?: number;
+          cost_cents?: number;
+          created_at?: string;
+          duration_ms?: number | null;
+          id?: string;
+          input_tokens?: number;
+          model?: string;
+          output_tokens?: number;
+          pass?: string;
+          request_id?: string | null;
+          scan_id?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "claude_api_calls_scan_id_fkey";
+            columns: ["scan_id"];
+            isOneToOne: false;
+            referencedRelation: "scans";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "claude_api_calls_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       credit_transactions: {
         Row: {
           amount: number;

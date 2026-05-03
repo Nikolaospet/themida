@@ -16,6 +16,8 @@ const serverSchema = z.object({
   TOKEN_ENCRYPTION_KEY: z
     .string()
     .regex(/^[0-9a-fA-F]{64}$/u, "TOKEN_ENCRYPTION_KEY must be 64 hex characters (32 bytes)"),
+  SENTRY_ENVIRONMENT: z.enum(["development", "preview", "production"]).default("development"),
+  SENTRY_AUTH_TOKEN: z.string().optional().default(""),
 });
 
 const clientSchema = z.object({
@@ -23,6 +25,7 @@ const clientSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: stringNonEmpty,
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: stringNonEmpty,
+  NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional().or(z.literal("")).default(""),
 });
 
 export type ClientEnv = z.infer<typeof clientSchema>;
@@ -45,6 +48,7 @@ const clientValues = {
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+  NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 };
 
 // Lazy-validated proxies. Validation runs on first property access, never at

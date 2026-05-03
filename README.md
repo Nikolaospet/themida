@@ -102,6 +102,24 @@ themida/
 - **Security:** CodeQL + gitleaks on every PR and weekly.
 - **Dependencies:** Dependabot grouped weekly updates.
 
+## Observability
+
+- **Logger:** Pino — server-side structured JSON logs. Pretty output in
+  development, plain JSON in test and production. Sensitive fields
+  (`password`, `token`, `apiKey`, `authorization`) are auto-redacted.
+  Use `import { childLogger } from "@/lib/logger"` to attach correlation
+  IDs (`scanId`, `userId`, `requestId`).
+- **Errors / traces:** Sentry (EU instance) via `@sentry/nextjs`. Set
+  `NEXT_PUBLIC_SENTRY_DSN` to enable. Source maps are uploaded at
+  build time when `SENTRY_AUTH_TOKEN` + `SENTRY_ORG` + `SENTRY_PROJECT`
+  are set. Local dev keeps the SDK disabled unless
+  `SENTRY_FORCE_ENABLE=1` is exported.
+- **Cost tracking:** Every Anthropic call (when wired in Phase 3b)
+  goes through `src/lib/observability/cost-tracker.ts`, which records
+  the call in `public.claude_api_calls` with input / output / cached
+  tokens and the cost in cents. Pricing is integer cents per 1M
+  tokens to avoid floating-point rounding.
+
 ## Contributing
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
