@@ -1,7 +1,7 @@
-// Server-only by transitive dependency on the OpenRouter client and
+// Server-only by transitive dependency on the Anthropic client and
 // Supabase admin paths. Omitting the explicit `server-only` marker keeps
 // this module importable from CLI scripts (e.g. scripts/dev-scan.mts).
-import { callOpenRouter } from "@/lib/llm/openrouter";
+import { callAnthropic } from "@/lib/llm/anthropic";
 import { LlmJsonParseError, parseStrictJson } from "@/lib/llm/parser";
 import { buildReconUserPrompt, buildSystemPrompt } from "@/lib/llm/prompts";
 import type { ComplianceRule } from "@/lib/rules/types";
@@ -41,7 +41,7 @@ export async function runReconPass(
     { role: "user" as const, content: userPrompt },
   ];
 
-  const first = await callOpenRouter(messages, {
+  const first = await callAnthropic(messages, {
     pass: "recon",
     scanId: options.scanId ?? null,
     userId: options.userId ?? null,
@@ -52,7 +52,7 @@ export async function runReconPass(
     parsed = parseStrictJson<ReconResponse>(first.text, ReconResponseSchema);
   } catch (err) {
     if (!(err instanceof LlmJsonParseError)) throw err;
-    const second = await callOpenRouter(
+    const second = await callAnthropic(
       [...messages, { role: "user" as const, content: retryUserPrompt(err) }],
       {
         pass: "recon",

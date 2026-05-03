@@ -1,7 +1,7 @@
-// Server-only by transitive dependency on the OpenRouter client and
+// Server-only by transitive dependency on the Anthropic client and
 // Supabase admin paths. Omitting the explicit `server-only` marker keeps
 // this module importable from CLI scripts (e.g. scripts/dev-scan.mts).
-import { callOpenRouter } from "@/lib/llm/openrouter";
+import { callAnthropic } from "@/lib/llm/anthropic";
 import { LlmJsonParseError, parseStrictJson } from "@/lib/llm/parser";
 import { buildSystemPrompt, buildVerificationUserPrompt } from "@/lib/llm/prompts";
 import type { ComplianceRule } from "@/lib/rules/types";
@@ -46,7 +46,7 @@ async function verifyBatch(
     { role: "user" as const, content: userPrompt },
   ];
 
-  const first = await callOpenRouter(messages, {
+  const first = await callAnthropic(messages, {
     pass: "verification",
     scanId: options.scanId ?? null,
     userId: options.userId ?? null,
@@ -56,7 +56,7 @@ async function verifyBatch(
     return parseStrictJson<VerificationResponse>(first.text, VerificationResponseSchema);
   } catch (err) {
     if (!(err instanceof LlmJsonParseError)) throw err;
-    const second = await callOpenRouter(
+    const second = await callAnthropic(
       [...messages, { role: "user" as const, content: retryUserPrompt(err) }],
       { pass: "verification", scanId: options.scanId ?? null, userId: options.userId ?? null },
     );

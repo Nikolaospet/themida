@@ -3,13 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { runComplianceScan } from "./index";
 
-const callOpenRouterMock = vi.fn();
-vi.mock("@/lib/llm/openrouter", () => ({
-  callOpenRouter: (...args: unknown[]) => callOpenRouterMock(...args),
+const callAnthropicMock = vi.fn();
+vi.mock("@/lib/llm/anthropic", () => ({
+  callAnthropic: (...args: unknown[]) => callAnthropicMock(...args),
 }));
 
 beforeEach(() => {
-  callOpenRouterMock.mockReset();
+  callAnthropicMock.mockReset();
 });
 
 const md5File = "import md5 from 'md5'\nconst hash = md5(password)\n";
@@ -20,8 +20,8 @@ const reconResp = (paths: string[]) => ({
   outputTokens: 20,
   durationMs: 50,
   requestId: "r",
-  model: "google/gemma-4-31b-it:free",
-  provider: "openrouter",
+  model: "claude-sonnet-4-6",
+  provider: "anthropic",
 });
 
 const deepResp = (paths: string[]) => ({
@@ -56,8 +56,8 @@ const deepResp = (paths: string[]) => ({
   outputTokens: 60,
   durationMs: 80,
   requestId: "r",
-  model: "google/gemma-4-31b-it:free",
-  provider: "openrouter",
+  model: "claude-sonnet-4-6",
+  provider: "anthropic",
 });
 
 const verifyResp = (paths: string[]) => ({
@@ -84,13 +84,13 @@ const verifyResp = (paths: string[]) => ({
   outputTokens: 40,
   durationMs: 30,
   requestId: "r",
-  model: "google/gemma-4-31b-it:free",
-  provider: "openrouter",
+  model: "claude-sonnet-4-6",
+  provider: "anthropic",
 });
 
 describe("runComplianceScan", () => {
   it("runs recon → deep → verify → score on a happy path", async () => {
-    callOpenRouterMock
+    callAnthropicMock
       .mockResolvedValueOnce(reconResp(["src/auth.ts"]))
       .mockResolvedValueOnce(deepResp(["src/auth.ts"]))
       .mockResolvedValueOnce(verifyResp(["src/auth.ts"]));
@@ -105,25 +105,25 @@ describe("runComplianceScan", () => {
     expect(result.score).toBe(75);
     expect(result.stats.findingsRaw).toBe(1);
     expect(result.stats.findingsVerified).toBe(1);
-    expect(callOpenRouterMock).toHaveBeenCalledTimes(3);
+    expect(callAnthropicMock).toHaveBeenCalledTimes(3);
   });
 
   it("short-circuits when filtering yields zero files", async () => {
     const result = await runComplianceScan({ files: [], frameworks: ["gdpr"] });
     expect(result.findings).toEqual([]);
     expect(result.score).toBe(100);
-    expect(callOpenRouterMock).not.toHaveBeenCalled();
+    expect(callAnthropicMock).not.toHaveBeenCalled();
   });
 
   it("skips deep + verify when recon returns no paths", async () => {
-    callOpenRouterMock.mockResolvedValueOnce(reconResp([]));
+    callAnthropicMock.mockResolvedValueOnce(reconResp([]));
     const result = await runComplianceScan({
       files: [{ path: "src/auth.ts", size: 5, content: md5File }],
       frameworks: ["gdpr"],
     });
     expect(result.findings).toEqual([]);
     expect(result.score).toBe(100);
-    expect(callOpenRouterMock).toHaveBeenCalledTimes(1);
+    expect(callAnthropicMock).toHaveBeenCalledTimes(1);
   });
 
   it("propagates an unknown framework as an error", async () => {

@@ -1,17 +1,14 @@
 // Server-only by transitive dependency on the Supabase admin client.
 // Omitting the explicit `server-only` marker keeps this module importable
-// from CLI scripts (e.g. scripts/dev-scan.mts) and from the OpenRouter
+// from CLI scripts (e.g. scripts/dev-scan.mts) and from the Anthropic
 // client which lives outside the Next.js bundle in tests.
 import { childLogger } from "@/lib/logger";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
-// Pricing in cents per 1M tokens.
-// Anthropic public rates as of May 2026; the Gemma free tier is metered
-// at zero everywhere by design.
+// Pricing in cents per 1M tokens. Anthropic public rates as of May 2026.
 const PRICING_CENTS_PER_1M = {
   "claude-sonnet-4-6": { input: 300, cached_input: 30, output: 1500 },
   "claude-haiku-4-5": { input: 100, cached_input: 10, output: 500 },
-  "google/gemma-4-31b-it:free": { input: 0, cached_input: 0, output: 0 },
 } as const;
 
 export type Model = keyof typeof PRICING_CENTS_PER_1M;

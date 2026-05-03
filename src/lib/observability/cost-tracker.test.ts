@@ -28,11 +28,6 @@ describe("computeCostCents", () => {
     expect(cents).toBe(1);
   });
 
-  it("returns zero cents for the Gemma free model regardless of token volume", () => {
-    expect(computeCostCents("google/gemma-4-31b-it:free", 0, 0, 0)).toBe(0);
-    expect(computeCostCents("google/gemma-4-31b-it:free", 1_000_000, 0, 1_000_000)).toBe(0);
-  });
-
   it("rejects negative token counts", () => {
     expect(() => computeCostCents("claude-sonnet-4-6", -1, 0, 0)).toThrow(/non-negative/);
     expect(() => computeCostCents("claude-sonnet-4-6", 0, -1, 0)).toThrow(/non-negative/);

@@ -5,13 +5,13 @@ import { GDPR_001 } from "@/lib/rules/gdpr";
 
 import { runDeepScanPass } from "./deep";
 
-const callOpenRouterMock = vi.fn();
-vi.mock("@/lib/llm/openrouter", () => ({
-  callOpenRouter: (...args: unknown[]) => callOpenRouterMock(...args),
+const callAnthropicMock = vi.fn();
+vi.mock("@/lib/llm/anthropic", () => ({
+  callAnthropic: (...args: unknown[]) => callAnthropicMock(...args),
 }));
 
 beforeEach(() => {
-  callOpenRouterMock.mockReset();
+  callAnthropicMock.mockReset();
 });
 
 function deepScanResponse(ruleId: string, file: string) {
@@ -49,14 +49,14 @@ function deepScanResponse(ruleId: string, file: string) {
     outputTokens: 50,
     durationMs: 80,
     requestId: "r",
-    model: "google/gemma-4-31b-it:free",
-    provider: "openrouter",
+    model: "claude-sonnet-4-6",
+    provider: "anthropic",
   };
 }
 
 describe("runDeepScanPass", () => {
   it("flattens findings from every chunk", async () => {
-    callOpenRouterMock
+    callAnthropicMock
       .mockResolvedValueOnce(deepScanResponse("GDPR-001", "src/a.ts"))
       .mockResolvedValueOnce(deepScanResponse("GDPR-001", "src/b.ts"));
 
@@ -69,13 +69,13 @@ describe("runDeepScanPass", () => {
     );
 
     expect(findings.map((f) => f.file_path).sort()).toEqual(["src/a.ts", "src/b.ts"]);
-    expect(callOpenRouterMock).toHaveBeenCalledTimes(2);
+    expect(callAnthropicMock).toHaveBeenCalledTimes(2);
   });
 
   it("respects the concurrency cap (default 2)", async () => {
     let inFlight = 0;
     let maxInFlight = 0;
-    callOpenRouterMock.mockImplementation(async (_messages: unknown, options: { pass: string }) => {
+    callAnthropicMock.mockImplementation(async (_messages: unknown, options: { pass: string }) => {
       expect(options.pass).toBe("deep_scan");
       inFlight += 1;
       maxInFlight = Math.max(maxInFlight, inFlight);
@@ -94,19 +94,19 @@ describe("runDeepScanPass", () => {
   it("returns empty list when given no chunks", async () => {
     const findings = await runDeepScanPass([], [GDPR_001]);
     expect(findings).toEqual([]);
-    expect(callOpenRouterMock).not.toHaveBeenCalled();
+    expect(callAnthropicMock).not.toHaveBeenCalled();
   });
 
   it("retries a chunk once on JSON parse failure", async () => {
-    callOpenRouterMock
+    callAnthropicMock
       .mockResolvedValueOnce({
         text: "not json",
         inputTokens: 0,
         outputTokens: 0,
         durationMs: 0,
         requestId: "r",
-        model: "google/gemma-4-31b-it:free",
-        provider: "openrouter",
+        model: "claude-sonnet-4-6",
+        provider: "anthropic",
       })
       .mockResolvedValueOnce(deepScanResponse("GDPR-001", "src/a.ts"));
 
@@ -115,6 +115,6 @@ describe("runDeepScanPass", () => {
       [GDPR_001],
     );
     expect(findings).toHaveLength(1);
-    expect(callOpenRouterMock).toHaveBeenCalledTimes(2);
+    expect(callAnthropicMock).toHaveBeenCalledTimes(2);
   });
 });
