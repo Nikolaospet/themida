@@ -168,6 +168,57 @@ locally regardless of the authenticated session — but it requires that
 you've completed the GitHub App install flow at least once (otherwise
 no `repos` row exists for it to read).
 
+## AI scanner (Phase 3b)
+
+The compliance scanner uses **Gemma 4 31B Instruct** via the
+**OpenRouter** gateway (`google/gemma-4-31b-it:free`). The pipeline
+is the classic three-pass setup:
+
+1. **Recon** — one LLM call, file-signature input, returns up to 15
+   most-suspect paths.
+2. **Deep scan** — runs in parallel chunks of ≤ 20 K tokens with a
+   concurrency cap of 2; each chunk returns `RawFinding[]`.
+3. **Verification** — a final pass that drops hallucinated paths and
+   already-mitigated cases. Findings are batched at 30/group.
+
+Every call is logged to `public.llm_api_calls` with `provider`,
+`model`, `pass`, token usage, duration and (when a paid model is in
+use) cost in cents.
+
+### Config
+
+```env
+OPENROUTER_API_KEY=...                       # required
+OPENROUTER_MODEL=google/gemma-4-31b-it:free  # default
+```
+
+### End-to-end run
+
+```bash
+pnpm dev:scan
+```
+
+Picks the most-recently-connected repo, runs the full pipeline,
+prints scan stats + the top findings.
+
+### Live eval test
+
+```bash
+LIVE_LLM=1 pnpm test evals/live-llm.test.ts
+```
+
+Spends 3 free-tier calls (recon + deep + verify) against
+`evals/repos/002-md5-password-leftover/`. Passes when at least one
+verified `GDPR-001` finding is returned.
+
+### What is NOT in Phase 3b
+
+- Trigger.dev wiring — Phase 4.
+- Credit deduction + idempotency — Phase 4.
+- API route + Realtime UI — Phase 5.
+- Eval CI gate with false-positive thresholds — Phase 3c.
+- Prompt caching — re-evaluated when we move off the free tier.
+
 ## Contributing
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
