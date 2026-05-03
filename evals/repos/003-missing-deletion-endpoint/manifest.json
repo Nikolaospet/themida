@@ -1,0 +1,11 @@
+{
+  "name": "003-missing-deletion-endpoint",
+  "description": "Express user CRUD with no DELETE handler — violates GDPR Article 17.",
+  "frameworks": ["gdpr"],
+  "expected_findings": [
+    {
+      "rule_id": "GDPR-003",
+      "file_path": "src/routes/users.ts"
+    }
+  ]
+}

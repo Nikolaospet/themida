@@ -1,0 +1,12 @@
+{
+  "name": "002-md5-password-leftover",
+  "description": "Mostly bcrypt-based auth, but a legacy migration script still hashes passwords with MD5.",
+  "frameworks": ["gdpr"],
+  "expected_findings": [
+    {
+      "rule_id": "GDPR-001",
+      "file_path": "src/auth/legacy-hash.ts",
+      "line_number_approx": 5
+    }
+  ]
+}

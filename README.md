@@ -124,6 +124,24 @@ themida/
   tokens and the cost in cents. Pricing is integer cents per 1M
   tokens to avoid floating-point rounding.
 
+## Compliance rules + evals
+
+The rules engine lives under `src/lib/rules/` (immutable
+`ComplianceRule` data) and `src/lib/scanner/` (file filter +
+chunker). The first 10 rules ship in this codebase: 5 GDPR rules
+(`GDPR-001`–`GDPR-005`) and 5 EU AI Act rules
+(`AI-ACT-001`–`AI-ACT-005`). New rules go in
+`src/lib/rules/<framework>.ts` and are registered automatically via
+the framework arrays.
+
+Hand-labelled fixture repositories live under `evals/repos/<id>/`,
+each shipping a `manifest.json` listing expected findings + a `code/`
+tree we evaluate against. Phase 3a's eval only validates that the
+file filter surfaces the files where findings are expected — actual
+detection lands in Phase 3b once the Claude integration is wired.
+
+Run the suite via `pnpm evals:run` (it is also part of `pnpm test`).
+
 ## Contributing
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md).

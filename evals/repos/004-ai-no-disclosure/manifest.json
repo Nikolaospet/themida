@@ -1,0 +1,12 @@
+{
+  "name": "004-ai-no-disclosure",
+  "description": "Chat endpoint that returns AI-generated text to end users without any AI-disclosure marker.",
+  "frameworks": ["eu-ai-act"],
+  "expected_findings": [
+    {
+      "rule_id": "AI-ACT-001",
+      "file_path": "src/api/chat.ts",
+      "line_number_approx": 10
+    }
+  ]
+}
