@@ -26,6 +26,7 @@
     "evals:run": "vitest run evals/runner.test.ts",
     "dev:fetch": "tsx scripts/dev-fetch-stats.mts",
     "dev:scan": "tsx scripts/dev-scan.mts",
+    "trigger:dev": "pnpm dlx trigger.dev@latest dev",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -44,6 +45,7 @@
     "@sentry/nextjs": "^10.51.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.1",
+    "@trigger.dev/sdk": "^4.4.5",
     "next": "16.2.4",
     "octokit": "^5.0.5",
     "pino": "^10.3.1",
@@ -60,6 +62,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
+    "@trigger.dev/build": "^4.4.5",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
