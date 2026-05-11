@@ -49,6 +49,7 @@ export async function runScanJobBody(payload: ScanJobPayload): Promise<void> {
 
     await persistScanResults(payload.scanId, {
       kind: "completed",
+      userId: payload.userId,
       score: result.score,
       findings: result.findings,
       stats: result.stats,
@@ -58,6 +59,7 @@ export async function runScanJobBody(payload: ScanJobPayload): Promise<void> {
     log.error({ err, scanId: payload.scanId }, "scan job failed");
     await persistScanResults(payload.scanId, {
       kind: "failed",
+      userId: payload.userId,
       failureReason: classifyFailure(message),
     });
     throw err;

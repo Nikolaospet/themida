@@ -1,5 +1,4 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import type { Json } from "@/types/database";
 
 import type { ScanResult, VerifiedFinding } from "./findings";
 import { type ScanProgress, serializeProgress } from "./progress";
@@ -40,7 +39,7 @@ export async function updateScanProgress(scanId: string, progress: ScanProgress)
   const admin = createSupabaseAdminClient();
   const { error } = await admin
     .from("scans")
-    .update({ progress: serializeProgress(progress) as Json })
+    .update({ progress: serializeProgress(progress) })
     .eq("id", scanId);
   if (error) throw new Error(`progress update failed: ${error.message}`);
 }
@@ -48,11 +47,12 @@ export async function updateScanProgress(scanId: string, progress: ScanProgress)
 export type PersistResult =
   | {
       kind: "completed";
+      userId: string;
       score: number;
       findings: readonly VerifiedFinding[];
       stats: ScanResult["stats"];
     }
-  | { kind: "failed"; failureReason: string };
+  | { kind: "failed"; userId: string; failureReason: string };
 
 export async function persistScanResults(scanId: string, result: PersistResult): Promise<void> {
   const admin = createSupabaseAdminClient();
@@ -70,23 +70,17 @@ export async function persistScanResults(scanId: string, result: PersistResult):
         low_count: result.findings.filter((f) => f.severity === "LOW").length,
         files_scanned: result.stats.filesScanned,
         completed_at: new Date().toISOString(),
-        progress: serializeProgress({ phase: "done" }) as Json,
+        progress: serializeProgress({ phase: "done" }),
       })
       .eq("id", scanId);
     if (scanErr) throw new Error(`scan finalize failed: ${scanErr.message}`);
 
     if (result.findings.length === 0) return;
 
-    const userIdLookup = await admin.from("scans").select("user_id").eq("id", scanId).single();
-    if (userIdLookup.error || !userIdLookup.data?.user_id) {
-      throw new Error(`scan user lookup failed: ${userIdLookup.error?.message ?? "no user_id"}`);
-    }
-    const userId = userIdLookup.data.user_id;
-
     // VerifiedFinding fields are already snake_case matching the `issues` columns.
     const rows = result.findings.map((f) => ({
       scan_id: scanId,
-      user_id: userId,
+      user_id: result.userId,
       rule_id: f.rule_id,
       framework: f.framework,
       file_path: f.file_path,
