@@ -16,6 +16,7 @@ export type DeepScanOptions = {
   readonly scanId?: string | null;
   readonly userId?: string | null;
   readonly concurrency?: number;
+  readonly onChunkComplete?: (done: number, total: number) => void;
 };
 
 export async function runDeepScanPass(
@@ -37,6 +38,7 @@ export async function runDeepScanPass(
     for (const r of results) {
       findings.push(...r);
     }
+    options.onChunkComplete?.(Math.min(start + slice.length, chunks.length), chunks.length);
   }
 
   return findings;
