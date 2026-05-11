@@ -110,3 +110,27 @@ export async function persistScanResults(scanId: string, result: PersistResult):
     if (error) throw new Error(`scan failed-state update failed: ${error.message}`);
   }
 }
+
+export type InsertScanInput = {
+  readonly repoId: string;
+  readonly userId: string;
+  readonly frameworks: readonly string[];
+};
+
+export async function insertScan(input: InsertScanInput): Promise<{ id: string }> {
+  const admin = createSupabaseAdminClient();
+  const { data, error } = await admin
+    .from("scans")
+    .insert({
+      repo_id: input.repoId,
+      user_id: input.userId,
+      frameworks: [...input.frameworks],
+      status: "pending",
+      progress: serializeProgress({ phase: "queued" }),
+      started_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
+  if (error || !data) throw new Error(`scan insert failed: ${error?.message}`);
+  return { id: data.id };
+}
