@@ -404,6 +404,32 @@ export type Database = {
           },
         ];
       };
+      scan_rate_state: {
+        Row: {
+          scans_in_window: number;
+          user_id: string;
+          window_start: string;
+        };
+        Insert: {
+          scans_in_window?: number;
+          user_id: string;
+          window_start?: string;
+        };
+        Update: {
+          scans_in_window?: number;
+          user_id?: string;
+          window_start?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "scan_rate_state_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       scans: {
         Row: {
           completed_at: string | null;
@@ -420,6 +446,7 @@ export type Database = {
           id: string;
           low_count: number;
           medium_count: number;
+          progress: Json;
           repo_id: string;
           started_at: string | null;
           status: Database["public"]["Enums"]["scan_status"];
@@ -441,6 +468,7 @@ export type Database = {
           id?: string;
           low_count?: number;
           medium_count?: number;
+          progress?: Json;
           repo_id: string;
           started_at?: string | null;
           status?: Database["public"]["Enums"]["scan_status"];
@@ -462,6 +490,7 @@ export type Database = {
           id?: string;
           low_count?: number;
           medium_count?: number;
+          progress?: Json;
           repo_id?: string;
           started_at?: string | null;
           status?: Database["public"]["Enums"]["scan_status"];
