@@ -13,6 +13,7 @@ const serverSchema = z.object({
   STRIPE_SECRET_KEY: stringNonEmpty,
   STRIPE_WEBHOOK_SECRET: stringNonEmpty,
   TRIGGER_SECRET_KEY: stringNonEmpty,
+  TRIGGER_PROJECT_REF: stringNonEmpty,
   RESEND_API_KEY: stringNonEmpty,
   TOKEN_ENCRYPTION_KEY: z
     .string()
