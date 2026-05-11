@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { Json } from "@/types/database";
+
 const PHASES = [
   "queued",
   "fetching",
@@ -40,7 +42,7 @@ export function parseProgress(raw: unknown): ScanProgress {
   return { phase: phase as Exclude<ScanPhase, "deep_scan"> };
 }
 
-export function serializeProgress(p: ScanProgress): Record<string, unknown> {
+export function serializeProgress(p: ScanProgress): Json {
   if (p.phase === "deep_scan") {
     return { phase: p.phase, files_done: p.filesDone, files_total: p.filesTotal };
   }
