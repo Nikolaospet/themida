@@ -519,7 +519,11 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      consume_daily_scan_slot: {
+        Args: { p_cap: number; p_user_id: string };
+        Returns: Json;
+      };
+      sum_llm_cost_last_24h: { Args: never; Returns: number };
     };
     Enums: {
       confidence: "HIGH" | "MEDIUM" | "LOW";
