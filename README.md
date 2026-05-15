@@ -223,6 +223,35 @@ verified `GDPR-001` finding is returned.
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
+## Phase 4-A — manual smoke test
+
+After running migrations and starting both dev servers
+(`pnpm dev` in one terminal, `pnpm trigger:dev` in another):
+
+1. Log in via GitHub OAuth.
+2. Install the Themida GitHub App on a test account and connect at
+   least one repository.
+3. Open the repo's detail page (`/repos/[id]`) — click **Run scan**.
+4. Watch the progress stepper advance:
+   fetching → filtering → recon → deep_scan → verifying.
+5. During `deep_scan`, the file counter should advance
+   (e.g. *Analyzing 23 of 47 files*).
+6. On completion, land on the results page. Verify:
+   - Compliance score displays in the correct color band.
+   - Severity-count pills match the issue list.
+   - Clicking a severity pill toggles it (URL updates with
+     `?severity=…`).
+   - The **Sort** dropdown re-orders the list (URL updates with
+     `?sort=file`).
+   - Any `file:line` link opens the matching GitHub blob line.
+7. Click **Run scan** again while the previous one is pending —
+   the server action rejects, a toast surfaces, no second scan is
+   queued.
+8. Run 3 scans in 24h — the 4th attempt is rejected with a
+   daily-cap toast.
+9. Set `MAX_DAILY_SPEND_CENTS=0` in the env and restart — any scan
+   attempt is rejected with the kill-switch toast.
+
 ## Security
 
 See [`SECURITY.md`](./SECURITY.md). Do **not** open public issues for
