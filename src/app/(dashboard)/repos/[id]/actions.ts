@@ -1,6 +1,6 @@
 "use server";
 
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { requireUser } from "@/lib/auth/session";
 import { loadRepoForUser } from "@/lib/repos/access";
@@ -40,4 +40,43 @@ export async function startScan(repoId: string): Promise<{ scanId: string }> {
   });
 
   return { scanId: scan.id };
+}
+
+/**
+ * Form-friendly wrapper. Maps guardrail errors to query-string codes
+ * (consumed by RepoDetailPage and surfaced as toasts client-side) and
+ * redirects to the new scan page on success.
+ *
+ * Note: Next.js redirect() throws — never `return` after it.
+ */
+export async function startScanFromForm(formData: FormData): Promise<void> {
+  const repoId = formData.get("repoId");
+  if (typeof repoId !== "string" || repoId.length === 0) {
+    redirect("/dashboard?scan_error=invalid_repo");
+  }
+
+  try {
+    const { scanId } = await startScan(repoId);
+    redirect(`/scan/${scanId}`);
+  } catch (err) {
+    // Next's redirect() throws a special error — let it propagate.
+    if (err && typeof err === "object" && "digest" in err) throw err;
+
+    const code = errorCode(err);
+    redirect(`/repos/${repoId}?scan_error=${code}`);
+  }
+}
+
+function errorCode(err: unknown): string {
+  if (!(err instanceof Error)) return "unknown";
+  switch (err.name) {
+    case "DailyCapExceededError":
+      return "daily_cap";
+    case "KillSwitchTrippedError":
+      return "kill_switch";
+    case "ScanAlreadyRunningError":
+      return "already_running";
+    default:
+      return "unknown";
+  }
 }
