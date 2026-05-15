@@ -46,28 +46,31 @@ export default async function DashboardPage() {
       ) : (
         <ul className="divide-y divide-neutral-800 rounded-xl border border-neutral-800 bg-neutral-900">
           {repoList.map((repo) => (
-            <li key={repo.id} className="flex items-center justify-between p-4">
-              <div>
-                <p className="text-sm font-medium text-neutral-100">{repo.full_name}</p>
-                <p className="text-xs text-neutral-500">
-                  {repo.private ? "Private" : "Public"} · default branch{" "}
-                  <span className="text-neutral-300">{repo.default_branch}</span>
-                  {repo.last_scanned_at ? (
-                    <>
-                      {" "}
-                      · last scanned{" "}
-                      <span className="text-neutral-300">
-                        {new Date(repo.last_scanned_at).toLocaleDateString()}
-                      </span>
-                    </>
-                  ) : (
-                    <> · never scanned</>
-                  )}
-                </p>
-              </div>
-              <span className="rounded-md border border-neutral-700 px-3 py-1.5 text-xs text-neutral-400">
-                Scan coming in Phase 3
-              </span>
+            <li key={repo.id}>
+              <Link
+                href={`/repos/${repo.id}`}
+                className="flex items-center justify-between p-4 transition hover:bg-neutral-800/50"
+              >
+                <div>
+                  <p className="text-sm font-medium text-neutral-100">{repo.full_name}</p>
+                  <p className="text-xs text-neutral-500">
+                    {repo.private ? "Private" : "Public"} · default branch{" "}
+                    <span className="text-neutral-300">{repo.default_branch}</span>
+                    {repo.last_scanned_at ? (
+                      <>
+                        {" "}
+                        · last scanned{" "}
+                        <span className="text-neutral-300">
+                          {new Date(repo.last_scanned_at).toLocaleDateString()}
+                        </span>
+                      </>
+                    ) : (
+                      <> · never scanned</>
+                    )}
+                  </p>
+                </div>
+                <span className="text-sm text-neutral-400">Open →</span>
+              </Link>
             </li>
           ))}
         </ul>
