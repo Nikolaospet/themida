@@ -75,5 +75,5 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return redirectToError(url.origin, "persist_failed");
   }
 
-  return NextResponse.redirect(new URL(`/repos/${installationId}`, url.origin));
+  return NextResponse.redirect(new URL(`/repos/install/${installationId}`, url.origin));
 }
