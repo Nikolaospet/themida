@@ -50,13 +50,13 @@ We follow a coordinated disclosure model:
 
 ## Hardening defaults
 
+The project tries to ship sane defaults out of the box:
+
 - Strict Content-Security-Policy and HSTS preload.
 - All env vars validated by Zod on boot — fail-fast.
 - GitHub App installation tokens encrypted at rest with AES-256-GCM.
 - Row-level security on every database table from migration 0001.
-- Pre-commit secret scanning (`secretlint`) and CI scanning (`gitleaks`,
-  `CodeQL`).
-- Dependabot security alerts enabled.
-- Branch protection on `main`: required PRs, required CI checks, no force push.
+- Pre-commit secret scanning (`secretlint`).
+- `gitleaks` and `CodeQL` recommended in CI when you self-host.
 
-Thank you for helping keep Themida and our users safe.
+Thanks for helping keep Themida and its users safe.
