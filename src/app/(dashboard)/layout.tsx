@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Toaster } from "sonner";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -51,6 +52,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>
+
+      <Toaster theme="dark" position="top-center" richColors closeButton />
     </div>
   );
 }

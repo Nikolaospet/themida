@@ -71,4 +71,38 @@ cp docs/adr/0001-stack-and-foundations.md docs/adr/000X-<title>.md
 
 ## Getting help
 
-Open a discussion or ping the maintainer.
+Open a [GitHub Discussion](https://github.com/Nikolaospet/themida/discussions)
+or a draft PR with questions inline.
+
+## DCO sign-off
+
+We use the [Developer Certificate of Origin](https://developercertificate.org/).
+Every commit must include a `Signed-off-by` trailer asserting you have the
+right to license your contribution under AGPL-3.0:
+
+```bash
+git commit -s -m "feat(rules): add HIPAA Section 164.312(a)(1) check"
+```
+
+The `-s` flag appends `Signed-off-by: Your Name <your.email>` automatically
+using your `git config user.name` and `user.email`.
+
+## Adding a new rule pack
+
+The highest-leverage contribution right now is a new compliance framework.
+See the [Adding a rule pack](./README.md#adding-a-rule-pack) section in the
+README for the file layout, then:
+
+1. Add `src/lib/rules/<framework>.ts` with 5+ rules
+2. Register the framework in `src/lib/rules/index.ts`
+3. Add at least one eval fixture under `evals/repos/<id>-<framework>/`
+4. Run `pnpm evals:run` and confirm the file filter surfaces the right files
+5. Open a PR with the rule sources cited (regulation article, OWASP entry,
+   NIST control, etc.)
+
+## License of contributions
+
+By submitting a contribution you agree it will be licensed under AGPL-3.0
+together with the rest of the project. If your contribution includes code or
+content from a third party, please call that out in the PR so we can verify
+license compatibility.

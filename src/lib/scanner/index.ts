@@ -7,6 +7,7 @@ import type { Framework } from "@/lib/rules/types";
 import { chunkFiles } from "./chunker";
 import { runDeepScanPass } from "./deep";
 import type { ScanResult } from "./findings";
+import type { ScanPhase } from "./progress";
 import { runReconPass } from "./recon";
 import { calculateComplianceScore } from "./score";
 import type { ScannerFile } from "./types";
@@ -14,11 +15,14 @@ import { runVerificationPass } from "./verify";
 
 const DEEP_CHUNK_TOKENS = 20_000;
 
+export type OrchestratorPhase = Extract<ScanPhase, "recon" | "deep_scan" | "verifying" | "done">;
+
 export type RunComplianceScanInput = {
   readonly files: readonly ScannerFile[];
   readonly frameworks: readonly Framework[];
   readonly scanId?: string | null;
   readonly userId?: string | null;
+  readonly onPhase?: (phase: OrchestratorPhase, filesDone?: number, filesTotal?: number) => void;
 };
 
 export async function runComplianceScan(input: RunComplianceScanInput): Promise<ScanResult> {
@@ -30,6 +34,7 @@ export async function runComplianceScan(input: RunComplianceScanInput): Promise<
 
   const startedAt = Date.now();
   if (input.files.length === 0 || input.frameworks.length === 0) {
+    input.onPhase?.("done");
     return {
       findings: [],
       score: 100,
@@ -47,8 +52,10 @@ export async function runComplianceScan(input: RunComplianceScanInput): Promise<
   const llmContext = { scanId: input.scanId ?? null, userId: input.userId ?? null };
 
   // Pass 2: recon.
+  input.onPhase?.("recon");
   const recon = await runReconPass(input.files, rules, llmContext);
   if (recon.topPaths.length === 0) {
+    input.onPhase?.("done");
     return {
       findings: [],
       score: 100,
@@ -72,11 +79,17 @@ export async function runComplianceScan(input: RunComplianceScanInput): Promise<
 
   // Pass 3: deep scan in chunks.
   const chunks = chunkFiles(selected, { maxTokensPerChunk: DEEP_CHUNK_TOKENS });
-  const raw = await runDeepScanPass(chunks, rules, llmContext);
+  input.onPhase?.("deep_scan", 0, chunks.length);
+  const raw = await runDeepScanPass(chunks, rules, {
+    ...llmContext,
+    onChunkComplete: (done, total) => input.onPhase?.("deep_scan", done, total),
+  });
 
   // Pass 4: verification.
+  input.onPhase?.("verifying");
   const verified = await runVerificationPass(raw, rules, llmContext);
 
+  input.onPhase?.("done");
   return {
     findings: verified,
     score: calculateComplianceScore(verified),

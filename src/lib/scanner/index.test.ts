@@ -1,7 +1,10 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import * as deep from "./deep";
 import { runComplianceScan } from "./index";
+import * as recon from "./recon";
+import * as verify from "./verify";
 
 const callAnthropicMock = vi.fn();
 vi.mock("@/lib/llm/anthropic", () => ({
@@ -134,5 +137,55 @@ describe("runComplianceScan", () => {
         frameworks: ["nope"],
       }),
     ).rejects.toThrow(/framework/u);
+  });
+});
+
+describe("runComplianceScan onPhase callback", () => {
+  it("fires phase events in the expected order", async () => {
+    vi.spyOn(recon, "runReconPass").mockResolvedValue({
+      topPaths: ["a.ts"],
+      raw: { top_paths: ["a.ts"] },
+    });
+    vi.spyOn(deep, "runDeepScanPass").mockResolvedValue([]);
+    vi.spyOn(verify, "runVerificationPass").mockResolvedValue([]);
+
+    const events: string[] = [];
+    await runComplianceScan({
+      files: [{ path: "a.ts", size: 11, content: "const x = 1" }],
+      frameworks: ["gdpr"],
+      onPhase: (phase) => events.push(phase),
+    });
+
+    expect(events).toEqual(["recon", "deep_scan", "verifying", "done"]);
+  });
+
+  it("reports deep-scan progress with file counter", async () => {
+    vi.spyOn(recon, "runReconPass").mockResolvedValue({
+      topPaths: ["a.ts", "b.ts"],
+      raw: { top_paths: ["a.ts", "b.ts"] },
+    });
+    const deepMock = vi
+      .spyOn(deep, "runDeepScanPass")
+      .mockImplementation(async (_chunks, _rules, opts) => {
+        opts?.onChunkComplete?.(1, 2);
+        opts?.onChunkComplete?.(2, 2);
+        return [];
+      });
+    vi.spyOn(verify, "runVerificationPass").mockResolvedValue([]);
+
+    const events: Array<{ phase: string; done: number | undefined; total: number | undefined }> =
+      [];
+    await runComplianceScan({
+      files: [
+        { path: "a.ts", size: 1, content: "x" },
+        { path: "b.ts", size: 1, content: "y" },
+      ],
+      frameworks: ["gdpr"],
+      onPhase: (phase, done, total) => events.push({ phase, done, total }),
+    });
+
+    expect(events).toContainEqual({ phase: "deep_scan", done: 1, total: 2 });
+    expect(events).toContainEqual({ phase: "deep_scan", done: 2, total: 2 });
+    expect(deepMock).toHaveBeenCalled();
   });
 });
