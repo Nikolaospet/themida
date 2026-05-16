@@ -6,6 +6,10 @@ const serverSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
   SUPABASE_SERVICE_ROLE_KEY: stringNonEmpty,
+  // LLM provider selection. Today: "anthropic" only. Follow-up commit adds
+  // an OpenAI-compatible provider that covers OpenAI, OpenRouter, Groq,
+  // Together, vLLM, and any other Chat-Completions-shaped endpoint.
+  LLM_PROVIDER: z.enum(["anthropic"]).default("anthropic"),
   ANTHROPIC_API_KEY: stringNonEmpty,
   ANTHROPIC_MODEL: stringNonEmpty.default("claude-sonnet-4-6"),
   GITHUB_CLIENT_ID: stringNonEmpty,

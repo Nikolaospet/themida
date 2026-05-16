@@ -6,13 +6,13 @@ import { GDPR_001 } from "@/lib/rules/gdpr";
 import type { RawFinding } from "./findings";
 import { runVerificationPass } from "./verify";
 
-const callAnthropicMock = vi.fn();
-vi.mock("@/lib/llm/anthropic", () => ({
-  callAnthropic: (...args: unknown[]) => callAnthropicMock(...args),
+const callLlmMock = vi.fn();
+vi.mock("@/lib/llm", () => ({
+  callLlm: (...args: unknown[]) => callLlmMock(...args),
 }));
 
 beforeEach(() => {
-  callAnthropicMock.mockReset();
+  callLlmMock.mockReset();
 });
 
 const finding = (i: number): RawFinding => ({
@@ -46,7 +46,7 @@ function verificationResponse(verified: RawFinding[]) {
 
 describe("runVerificationPass", () => {
   it("returns the verified findings only", async () => {
-    callAnthropicMock.mockResolvedValueOnce(verificationResponse([finding(1)]));
+    callLlmMock.mockResolvedValueOnce(verificationResponse([finding(1)]));
     const verified = await runVerificationPass([finding(1), finding(2)], [GDPR_001]);
     expect(verified).toHaveLength(1);
     expect(verified[0]?.file_path).toBe("src/1.ts");
@@ -55,18 +55,18 @@ describe("runVerificationPass", () => {
   it("does not call the LLM when given no findings", async () => {
     const verified = await runVerificationPass([], [GDPR_001]);
     expect(verified).toEqual([]);
-    expect(callAnthropicMock).not.toHaveBeenCalled();
+    expect(callLlmMock).not.toHaveBeenCalled();
   });
 
   it("batches large finding lists into groups of 30", async () => {
     const findings = Array.from({ length: 65 }, (_, i) => finding(i));
-    callAnthropicMock.mockImplementation(async () => verificationResponse(findings.slice(0, 30)));
+    callLlmMock.mockImplementation(async () => verificationResponse(findings.slice(0, 30)));
     await runVerificationPass(findings, [GDPR_001]);
-    expect(callAnthropicMock).toHaveBeenCalledTimes(3); // 30 + 30 + 5
+    expect(callLlmMock).toHaveBeenCalledTimes(3); // 30 + 30 + 5
   });
 
   it("retries once on JSON parse failure", async () => {
-    callAnthropicMock
+    callLlmMock
       .mockResolvedValueOnce({
         text: "garbage",
         inputTokens: 0,
@@ -79,6 +79,6 @@ describe("runVerificationPass", () => {
       .mockResolvedValueOnce(verificationResponse([finding(1)]));
     const verified = await runVerificationPass([finding(1)], [GDPR_001]);
     expect(verified).toHaveLength(1);
-    expect(callAnthropicMock).toHaveBeenCalledTimes(2);
+    expect(callLlmMock).toHaveBeenCalledTimes(2);
   });
 });
