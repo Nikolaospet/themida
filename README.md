@@ -60,12 +60,14 @@ issues, not to certify a clean bill.
 
 ## Demo
 
-- **Sample report** — [/sample/nodegoat](https://themida.dev/sample/nodegoat) — OWASP NodeGoat audit with 12 real findings
-- **Showcase** — [/showcase](https://themida.dev/showcase) — public-repo scans
+Run the app locally (see [Quickstart](#quickstart-5-min)) and open:
 
-The hosted version at <https://themida.dev> runs the same code as this repo
-under the same AGPL license — it exists as a convenience for users who don't
-want to run their own Postgres + queue. Self-hosting is the full product.
+- `/sample/nodegoat` — OWASP NodeGoat audit with 12 real findings (no signup)
+- `/showcase` — gallery of public-repo scans
+
+A hosted convenience version is planned but not live yet. When it ships it
+will run the same code as this repo under the same AGPL license — self-hosting
+is the full product.
 
 ---
 
@@ -255,8 +257,8 @@ You'll need a free Trigger.dev account and `TRIGGER_SECRET_KEY` in your env.
 Every LLM call is logged to `public.llm_api_calls` with provider, model, pass,
 token usage, duration and (for paid models) cost in cents.
 
-Full data lifecycle, sub-processors, and threat model live on
-[`/trust`](https://themida.dev/trust) and [`SECURITY.md`](./SECURITY.md).
+Full data lifecycle, sub-processors, and threat model live on the in-app
+`/trust` page (served by this repo) and [`SECURITY.md`](./SECURITY.md).
 
 ---
 
