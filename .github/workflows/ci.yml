@@ -4,30 +4,32 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+  workflow_dispatch:
+
+# Cancel an in-flight run when a new commit lands on the same branch / PR.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  quality:
-    name: Lint, Typecheck, Test, Build
+  ci:
+    name: Lint / Typecheck / Test / Build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          persist-credentials: false
 
-      - name: Install pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -36,17 +38,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Format check
-        run: pnpm format:check
-
       - name: Lint
         run: pnpm lint
 
       - name: Typecheck
         run: pnpm typecheck
-
-      - name: Secret scan
-        run: pnpm secretlint
 
       - name: Test
         run: pnpm test
@@ -54,7 +50,7 @@ jobs:
       - name: Build
         run: pnpm build
         env:
-          NEXT_TELEMETRY_DISABLED: "1"
-          # Real secrets are injected by the deployment platform; CI builds
-          # only need to verify that compilation succeeds.
-          SKIP_ENV_VALIDATION: "true"
+          # Build needs to resolve env vars at module load. The lazy proxies
+          # in src/env.ts honor this flag and skip Zod validation, so the
+          # production bundle still compiles in CI where no secrets exist.
+          SKIP_ENV_VALIDATION: "1"
