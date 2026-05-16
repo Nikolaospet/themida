@@ -6,13 +6,13 @@ import { runComplianceScan } from "./index";
 import * as recon from "./recon";
 import * as verify from "./verify";
 
-const callAnthropicMock = vi.fn();
-vi.mock("@/lib/llm/anthropic", () => ({
-  callAnthropic: (...args: unknown[]) => callAnthropicMock(...args),
+const callLlmMock = vi.fn();
+vi.mock("@/lib/llm", () => ({
+  callLlm: (...args: unknown[]) => callLlmMock(...args),
 }));
 
 beforeEach(() => {
-  callAnthropicMock.mockReset();
+  callLlmMock.mockReset();
 });
 
 const md5File = "import md5 from 'md5'\nconst hash = md5(password)\n";
@@ -93,7 +93,7 @@ const verifyResp = (paths: string[]) => ({
 
 describe("runComplianceScan", () => {
   it("runs recon → deep → verify → score on a happy path", async () => {
-    callAnthropicMock
+    callLlmMock
       .mockResolvedValueOnce(reconResp(["src/auth.ts"]))
       .mockResolvedValueOnce(deepResp(["src/auth.ts"]))
       .mockResolvedValueOnce(verifyResp(["src/auth.ts"]));
@@ -108,25 +108,25 @@ describe("runComplianceScan", () => {
     expect(result.score).toBe(75);
     expect(result.stats.findingsRaw).toBe(1);
     expect(result.stats.findingsVerified).toBe(1);
-    expect(callAnthropicMock).toHaveBeenCalledTimes(3);
+    expect(callLlmMock).toHaveBeenCalledTimes(3);
   });
 
   it("short-circuits when filtering yields zero files", async () => {
     const result = await runComplianceScan({ files: [], frameworks: ["gdpr"] });
     expect(result.findings).toEqual([]);
     expect(result.score).toBe(100);
-    expect(callAnthropicMock).not.toHaveBeenCalled();
+    expect(callLlmMock).not.toHaveBeenCalled();
   });
 
   it("skips deep + verify when recon returns no paths", async () => {
-    callAnthropicMock.mockResolvedValueOnce(reconResp([]));
+    callLlmMock.mockResolvedValueOnce(reconResp([]));
     const result = await runComplianceScan({
       files: [{ path: "src/auth.ts", size: 5, content: md5File }],
       frameworks: ["gdpr"],
     });
     expect(result.findings).toEqual([]);
     expect(result.score).toBe(100);
-    expect(callAnthropicMock).toHaveBeenCalledTimes(1);
+    expect(callLlmMock).toHaveBeenCalledTimes(1);
   });
 
   it("propagates an unknown framework as an error", async () => {
