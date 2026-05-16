@@ -158,6 +158,8 @@ export default async function LandingPage() {
           {`git clone https://github.com/Nikolaospet/themida
 cd themida
 pnpm install
+# pick one provider (see README) — example uses Anthropic:
+export LLM_PROVIDER=anthropic
 export ANTHROPIC_API_KEY=sk-ant-…
 pnpm themida scan ./path/to/repo`}
         </pre>
