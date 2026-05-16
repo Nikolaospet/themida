@@ -12,9 +12,6 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             <Link href="/showcase" className="text-neutral-400 hover:text-neutral-100">
               Showcase
             </Link>
-            <Link href="/trust" className="text-neutral-400 hover:text-neutral-100">
-              Trust
-            </Link>
             <Link
               href="https://github.com/Nikolaospet/themida"
               className="text-neutral-400 hover:text-neutral-100"
@@ -40,9 +37,6 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
           <nav className="flex gap-4">
             <Link href="/showcase" className="hover:text-neutral-300">
               Showcase
-            </Link>
-            <Link href="/trust" className="hover:text-neutral-300">
-              Trust
             </Link>
             <Link href="https://github.com/Nikolaospet/themida" className="hover:text-neutral-300">
               GitHub

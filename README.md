@@ -22,7 +22,7 @@ reads the code and tells you which line stores passwords with MD5.
 - ⚖️ **Legal citation** on every issue (article + maximum fine)
 - 🛠 **Suggested fix as code** — paste-ready, not prose
 - 📄 **PDF export** for auditors
-- 🏠 **Self-hostable** — bring your own LLM key, your code never touches our servers
+- 🏠 **Self-hostable** — bring your own LLM key, your code never leaves your machine
 
 ---
 
@@ -65,9 +65,8 @@ Run the app locally (see [Quickstart](#quickstart-5-min)) and open:
 - `/sample/nodegoat` — OWASP NodeGoat audit with 12 real findings (no signup)
 - `/showcase` — gallery of public-repo scans
 
-A hosted convenience version is planned but not live yet. When it ships it
-will run the same code as this repo under the same AGPL license — self-hosting
-is the full product.
+Self-hosting is the full product — there is no central server to depend on
+and no upstream account to create.
 
 ---
 
@@ -257,8 +256,8 @@ You'll need a free Trigger.dev account and `TRIGGER_SECRET_KEY` in your env.
 Every LLM call is logged to `public.llm_api_calls` with provider, model, pass,
 token usage, duration and (for paid models) cost in cents.
 
-Full data lifecycle, sub-processors, and threat model live on the in-app
-`/trust` page (served by this repo) and [`SECURITY.md`](./SECURITY.md).
+For the data flow, retention model, and threat model see
+[`SECURITY.md`](./SECURITY.md).
 
 ---
 
@@ -388,10 +387,12 @@ run tests locally.
 ## FAQ
 
 **Does Themida send my code to a third party?**
-Yes — it sends relevant files to whichever LLM provider you configure
-(Anthropic by default, OpenRouter as an alternative). Training is disabled at
-the API contract level. Nothing else leaves your machine: no telemetry, no
-Themida-hosted backend in the loop when you self-host.
+Yes — it sends relevant files to whichever LLM provider you configure. The
+provider runs under your API key, on your account, under whatever data-use
+contract you've signed with them. Themida itself has no backend: no
+telemetry, no analytics, no central server. The only network calls the
+scanner makes are to GitHub (to fetch code, if you point it at a remote
+repo) and to your chosen LLM provider.
 
 **Why AGPL-3.0 instead of MIT?**
 AGPL allows commercial use and forking. It only restricts one thing: running
@@ -401,10 +402,9 @@ vendor. If AGPL is a blocker for your use case, a commercial license is
 available — email <nikolaospetridhs@gmail.com>.
 
 **Can I run this against a private repo without giving anyone a token?**
-Yes — use the CLI path (`pnpm dev:scan` with a local clone), or set up the
-GitHub App on a self-hosted instance. The hosted version stores GitHub
-installation tokens encrypted with AES-256-GCM and can be revoked from your
-GitHub settings any time.
+Yes — use the CLI path (`pnpm dev:scan` with a local clone) and the
+scanner reads files straight off disk. The GitHub App path is for the
+remote-repo workflow; if you don't need it, skip it.
 
 **Why is the LLM doing the work and not deterministic rules?**
 Pattern-matching catches the easy cases but produces enormous false-positive

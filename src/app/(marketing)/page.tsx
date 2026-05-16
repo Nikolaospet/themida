@@ -151,8 +151,7 @@ export default async function LandingPage() {
           Five minutes from clone to first finding.
         </h2>
         <p className="mt-3 max-w-2xl text-neutral-400">
-          The scanner is the same code in the public repo and on the hosted version. You bring your
-          own LLM key, you control the API contract, you keep the findings.
+          You bring your own LLM key, you control the API contract, you keep the findings.
         </p>
 
         <pre className="mt-6 overflow-x-auto rounded-lg border border-neutral-800 bg-black/60 p-4 font-mono text-xs leading-relaxed text-neutral-300">
@@ -164,9 +163,8 @@ pnpm themida scan ./path/to/repo`}
         </pre>
 
         <p className="mt-4 text-xs text-neutral-500">
-          Files are sent to Anthropic under your key, with training disabled at the API contract
-          level. Nothing else leaves your laptop — no telemetry, no analytics, no Themida-hosted
-          backend in the loop.
+          Files are sent to your LLM provider under your key. Nothing else leaves your laptop — no
+          telemetry, no analytics, no third-party backend in the loop.
         </p>
 
         <p className="mt-2 font-mono text-xs text-neutral-500">
@@ -197,8 +195,7 @@ pnpm themida scan ./path/to/repo`}
             <span className="font-mono text-xs text-neutral-500">01</span>
             <h3 className="mt-2 text-lg font-semibold">Point at a repo</h3>
             <p className="mt-2 text-sm text-neutral-400">
-              Hosted: one-click GitHub App, read-only. Self-hosted: a local path, or your own GitHub
-              token. Nothing is stored on disk after the scan.
+              A local path, or a GitHub token you provide. Nothing is stored on disk after the scan.
             </p>
           </li>
           <li className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
@@ -274,8 +271,8 @@ pnpm themida scan ./path/to/repo`}
           Find out what is in your repo before your auditor does.
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-neutral-400">
-          Browse the public sample report on OWASP NodeGoat, clone the repo, or run the hosted
-          version.
+          Browse the public sample report on OWASP NodeGoat, then clone the repo and run it
+          yourself.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link
