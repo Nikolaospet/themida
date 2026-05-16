@@ -40,9 +40,10 @@ describe("computeCostCents", () => {
     );
   });
 
-  it("rejects unknown models", () => {
-    expect(() => computeCostCents("claude-future-99" as unknown as Model, 100, 0, 100)).toThrow(
-      /unknown model/,
-    );
+  it("returns 0 cents for unknown models (self-hosted / local LLMs)", () => {
+    // Unknown models are normal for self-hosters running open-weight or
+    // local backends. We record the call but skip pricing.
+    expect(computeCostCents("claude-future-99" as unknown as Model, 100, 0, 100)).toBe(0);
+    expect(computeCostCents("local/qwen3-coder-30b", 5_000_000, 0, 1_000_000)).toBe(0);
   });
 });
