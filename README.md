@@ -50,8 +50,9 @@ reads the code and tells you which line stores passwords with MD5.
 ## Status
 
 **Alpha.** GDPR (5 rules) and EU AI Act (5 rules) packs work end-to-end. The
-scanner pipeline (recon → deep scan → verify) is wired against Anthropic and
-OpenRouter. Expect rough edges — issues and PRs welcome.
+scanner pipeline (recon → deep scan → verify) is provider-agnostic — bring
+your own LLM key (Anthropic, OpenAI, OpenRouter, Groq, Together, vLLM,
+llama.cpp, …). Expect rough edges — issues and PRs welcome.
 
 Not yet recommended for production audit *submissions*. Use it to find real
 issues, not to certify a clean bill.
@@ -85,7 +86,9 @@ pnpm install
 
 # 3. Configure (only the LLM key is mandatory for the CLI path)
 cp .env.example .env.local
-# edit .env.local — set ANTHROPIC_API_KEY  (or OPENROUTER_API_KEY for free-tier)
+# edit .env.local — pick a provider:
+#   LLM_PROVIDER=anthropic  + ANTHROPIC_API_KEY=…
+#   LLM_PROVIDER=openai     + OPENAI_API_KEY=…  (+ OPENAI_BASE_URL=… for non-OpenAI backends)
 
 # 4. Scan a repo (CLI path)
 pnpm dev:scan
@@ -98,7 +101,8 @@ runs the full pipeline. If you haven't connected one yet, see
 Requires:
 
 - **Node.js ≥ 22**, **pnpm ≥ 10**
-- An **Anthropic API key** (or an **OpenRouter API key** for the free-tier `gemma-4-31b-it`)
+- An **LLM API key** for one of: Anthropic, OpenAI, OpenRouter, Groq, Together,
+  or any OpenAI-compatible endpoint (vLLM, llama.cpp server, Ollama, LiteLLM, …)
 
 ---
 
@@ -135,10 +139,13 @@ NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<from supabase start output>
 SUPABASE_SERVICE_ROLE_KEY=<from supabase start output>
 
-# At least one LLM key
+# Pick one LLM provider
+LLM_PROVIDER=anthropic
 ANTHROPIC_API_KEY=sk-ant-...
 # or
-OPENROUTER_API_KEY=sk-or-...
+# LLM_PROVIDER=openai
+# OPENAI_API_KEY=sk-...
+# OPENAI_BASE_URL=https://openrouter.ai/api/v1     # optional — defaults to OpenAI
 
 # Required for encrypting GitHub tokens at rest. Generate with:
 #   openssl rand -hex 32
@@ -193,9 +200,12 @@ You'll need a free Trigger.dev account and `TRIGGER_SECRET_KEY` in your env.
 
 | Variable | Required for | Notes |
 |----------|--------------|-------|
-| `ANTHROPIC_API_KEY` | Scanner (default) | Or use `OPENROUTER_API_KEY` |
-| `OPENROUTER_API_KEY` | Scanner (alt) | Free-tier `gemma-4-31b-it` available |
-| `OPENROUTER_MODEL` | Optional | Default `google/gemma-4-31b-it:free` |
+| `LLM_PROVIDER` | Scanner | `anthropic` (default) or `openai` |
+| `ANTHROPIC_API_KEY` | Scanner (`LLM_PROVIDER=anthropic`) | |
+| `OPENAI_API_KEY` | Scanner (`LLM_PROVIDER=openai`) | |
+| `OPENAI_BASE_URL` | Scanner (`LLM_PROVIDER=openai`) | Default OpenAI. Point at OpenRouter, Groq, vLLM, etc. |
+| `OPENAI_MODEL` | Scanner (`LLM_PROVIDER=openai`) | Default `gpt-4.1-mini` |
+| `OPENAI_PROVIDER_LABEL` | Optional | Label written to `llm_api_calls.provider` |
 | `NEXT_PUBLIC_SUPABASE_URL` | Web UI | From `pnpm db:start` output |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Web UI | From `pnpm db:start` output |
 | `SUPABASE_SERVICE_ROLE_KEY` | Web UI + admin | From `pnpm db:start` output |
@@ -326,7 +336,7 @@ themida/
 │   │   ├── scanner/         File filter, chunker, three-pass pipeline
 │   │   ├── github/          Trees + blob fetcher, file cache
 │   │   ├── crypto/          AES-256-GCM token encryption
-│   │   ├── llm/             Anthropic + OpenRouter adapters
+│   │   ├── llm/             Provider-agnostic facade + per-provider adapters
 │   │   ├── observability/   Pino logger, cost-tracker, Sentry init
 │   │   └── supabase/        Server, browser, admin clients
 │   ├── trigger/             Trigger.dev jobs (runScanJob)
@@ -348,7 +358,9 @@ themida/
 - **Tailwind CSS v4**
 - **Supabase** — Postgres + Auth + Storage + Realtime + RLS
 - **Trigger.dev v3** — background scan jobs
-- **Anthropic Claude** (`sonnet-4-6`) or **OpenRouter** for LLM passes
+- **Any LLM provider** for the scan passes — Anthropic, OpenAI, or any
+  Chat-Completions-compatible backend (OpenRouter, Groq, Together, vLLM,
+  llama.cpp server, Ollama, LiteLLM)
 - **Zod 4** — runtime validation
 - **Vitest** + Testing Library
 - **Pino** — structured JSON logs, sensitive-field auto-redaction
