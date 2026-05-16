@@ -15,6 +15,9 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             <Link href="/pricing" className="text-neutral-400 hover:text-neutral-100">
               Pricing
             </Link>
+            <Link href="/trust" className="text-neutral-400 hover:text-neutral-100">
+              Trust
+            </Link>
             <Link
               href="/login"
               className="rounded-lg bg-white px-3 py-1.5 font-medium text-neutral-900 hover:bg-neutral-100"
@@ -36,6 +39,9 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             </Link>
             <Link href="/pricing" className="hover:text-neutral-300">
               Pricing
+            </Link>
+            <Link href="/trust" className="hover:text-neutral-300">
+              Trust
             </Link>
             <Link href="/sample/nodegoat" className="hover:text-neutral-300">
               Sample report
