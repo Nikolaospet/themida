@@ -6,12 +6,29 @@ const serverSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
   SUPABASE_SERVICE_ROLE_KEY: stringNonEmpty,
-  // LLM provider selection. Today: "anthropic" only. Follow-up commit adds
-  // an OpenAI-compatible provider that covers OpenAI, OpenRouter, Groq,
-  // Together, vLLM, and any other Chat-Completions-shaped endpoint.
-  LLM_PROVIDER: z.enum(["anthropic"]).default("anthropic"),
-  ANTHROPIC_API_KEY: stringNonEmpty,
+  // LLM provider selection. Switch between the bundled provider
+  // implementations. `openai` covers any Chat-Completions-shaped endpoint
+  // (OpenAI, OpenRouter, Groq, Together, vLLM, llama.cpp server, Ollama,
+  // LiteLLM, …) via OPENAI_BASE_URL.
+  LLM_PROVIDER: z.enum(["anthropic", "openai"]).default("anthropic"),
+
+  // Anthropic provider. Required when LLM_PROVIDER=anthropic; otherwise
+  // optional so self-hosters on another provider don't have to invent a
+  // value.
+  ANTHROPIC_API_KEY: z.string().optional().default(""),
   ANTHROPIC_MODEL: stringNonEmpty.default("claude-sonnet-4-6"),
+
+  // OpenAI-compatible provider. Required when LLM_PROVIDER=openai;
+  // otherwise optional.
+  OPENAI_API_KEY: z.string().optional().default(""),
+  OPENAI_BASE_URL: z.string().url().optional().or(z.literal("")).default(""),
+  OPENAI_MODEL: stringNonEmpty.default("gpt-4.1-mini"),
+  // Header carrying the provider's request id (defaults to OpenAI's
+  // `x-request-id`; OpenRouter / vLLM / Groq usually match).
+  OPENAI_REQUEST_ID_HEADER: stringNonEmpty.default("x-request-id"),
+  // Label written to `llm_api_calls.provider`. Override to mark calls
+  // from a particular backend (e.g. "openrouter", "groq", "vllm-local").
+  OPENAI_PROVIDER_LABEL: stringNonEmpty.default("openai"),
   GITHUB_CLIENT_ID: stringNonEmpty,
   GITHUB_CLIENT_SECRET: stringNonEmpty,
   STRIPE_SECRET_KEY: stringNonEmpty,
