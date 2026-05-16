@@ -34,4 +34,4 @@ jobs:
           gitleaks version
 
       - name: Run gitleaks
-        run: gitleaks detect --source . --redact --verbose --exit-code 1 --no-banner
+        run: gitleaks detect --source . --config .gitleaks.toml --redact --verbose --exit-code 1 --no-banner
