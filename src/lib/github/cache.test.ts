@@ -7,7 +7,8 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 import { getCachedFiles, setCachedFiles } from "./cache";
 
-const ENABLED = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
+const ENABLED =
+  process.env.SUPABASE_LIVE_TESTS === "1" && Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
 const maybeDescribe = ENABLED ? describe : describe.skip;
 
 const admin = ENABLED ? createSupabaseAdminClient() : null;
