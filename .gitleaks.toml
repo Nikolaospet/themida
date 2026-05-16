@@ -1,0 +1,18 @@
+title = "Themida gitleaks config"
+
+# Inherit the upstream rule set; we only add allowlist rules below.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Ignore placeholder examples in docs and tests"
+
+# These paths are documentation and test fixtures — any PEM-shaped or
+# token-shaped string in them is a deliberate placeholder, not a real
+# secret. Real secrets land in `.env.local`, which is gitignored.
+paths = [
+  '''docs/.*''',
+  '''.*\.test\.ts$''',
+  '''.*\.test\.tsx$''',
+  '''evals/.*''',
+]
