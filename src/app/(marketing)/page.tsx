@@ -4,8 +4,10 @@ import { redirect } from "next/navigation";
 import { SeverityBadge } from "@/components/dashboard/SeverityBadge";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-const FRAMEWORKS_LIVE = ["GDPR", "EU AI Act"];
-const FRAMEWORKS_SOON = ["HIPAA", "SOC 2", "ISO 27001", "OWASP Top 10", "PCI DSS"];
+const FRAMEWORKS_SHIPPED = ["GDPR", "EU AI Act"];
+const FRAMEWORKS_OPEN = ["HIPAA", "SOC 2", "ISO 27001", "OWASP Top 10", "PCI DSS"];
+
+const GITHUB_URL = "https://github.com/Nikolaospet/themida";
 
 export default async function LandingPage() {
   const supabase = await createSupabaseServerClient();
@@ -23,7 +25,7 @@ export default async function LandingPage() {
       <section className="grid gap-10 pt-6 lg:grid-cols-[1.1fr_1fr] lg:items-center">
         <div>
           <p className="font-mono text-xs tracking-wider text-neutral-500 uppercase">
-            Compliance for developers
+            Open source · AGPL-3.0
           </p>
           <h1 className="mt-4 text-5xl font-semibold tracking-tight text-neutral-50 sm:text-6xl lg:text-7xl">
             GDPR fines hit €20M.
@@ -32,27 +34,40 @@ export default async function LandingPage() {
             We tell you exactly which line of code triggers them.
           </p>
           <p className="mt-6 max-w-xl text-base text-neutral-400">
-            Connect a GitHub repo. In 60 seconds Themida returns every compliance issue with the
-            file, the line, the legal article, and the code that fixes it.
+            Themida is an open-source compliance scanner. Point it at a GitHub repo and it returns
+            every issue with the file, the line, the legal article, and the code that fixes it.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href="/sample/nodegoat"
-              className="rounded-lg bg-white px-5 py-3 text-sm font-medium text-neutral-900 hover:bg-neutral-100"
+              href={GITHUB_URL}
+              className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-medium text-neutral-900 hover:bg-neutral-100"
             >
-              See a real report →
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.3 1.9 1.3 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.3-3.2-.1-.3-.6-1.6.1-3.3 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.2 3 .1 3.3.8.8 1.3 1.9 1.3 3.2 0 4.7-2.8 5.7-5.5 6 .4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3" />
+              </svg>
+              Star on GitHub
             </Link>
             <Link
-              href="/login"
+              href="/sample/nodegoat"
               className="rounded-lg border border-neutral-700 bg-neutral-900 px-5 py-3 text-sm font-medium text-neutral-100 hover:border-neutral-600"
             >
-              Scan your repo
+              See a real report →
             </Link>
           </div>
 
           <p className="mt-5 font-mono text-xs text-neutral-500">
-            No credit card. Free tier includes 5 scans.
+            Self-host in 5 minutes, or use the managed version free at{" "}
+            <Link href="/login" className="text-neutral-300 hover:text-neutral-100">
+              sign in
+            </Link>
+            .
           </p>
         </div>
 
@@ -127,6 +142,51 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* SELF-HOST quickstart -------------------------------------------- */}
+      <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-8">
+        <p className="font-mono text-xs tracking-wider text-neutral-500 uppercase">
+          Run it yourself
+        </p>
+        <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+          Five minutes from clone to first finding.
+        </h2>
+        <p className="mt-3 max-w-2xl text-neutral-400">
+          The scanner is the same code in the public repo and on the hosted version. You bring your
+          own LLM key, you control the API contract, you keep the findings.
+        </p>
+
+        <pre className="mt-6 overflow-x-auto rounded-lg border border-neutral-800 bg-black/60 p-4 font-mono text-xs leading-relaxed text-neutral-300">
+          {`git clone https://github.com/Nikolaospet/themida
+cd themida
+pnpm install
+export ANTHROPIC_API_KEY=sk-ant-…
+pnpm themida scan ./path/to/repo`}
+        </pre>
+
+        <p className="mt-4 text-xs text-neutral-500">
+          Files are sent to Anthropic under your key, with training disabled at the API contract
+          level. Nothing else leaves your laptop — no telemetry, no analytics, no Themida-hosted
+          backend in the loop.
+        </p>
+
+        <p className="mt-2 font-mono text-xs text-neutral-500">
+          <Link href={`${GITHUB_URL}#readme`} className="text-neutral-300 hover:text-neutral-100">
+            README
+          </Link>{" "}
+          ·{" "}
+          <Link href={`${GITHUB_URL}/issues`} className="text-neutral-300 hover:text-neutral-100">
+            Issues
+          </Link>{" "}
+          ·{" "}
+          <Link
+            href={`${GITHUB_URL}/blob/main/LICENSE`}
+            className="text-neutral-300 hover:text-neutral-100"
+          >
+            AGPL-3.0
+          </Link>
+        </p>
+      </section>
+
       {/* HOW IT WORKS ----------------------------------------------------- */}
       <section>
         <p className="font-mono text-xs tracking-wider text-neutral-500 uppercase">How it works</p>
@@ -135,26 +195,26 @@ export default async function LandingPage() {
         <ol className="mt-8 grid gap-6 sm:grid-cols-3">
           <li className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
             <span className="font-mono text-xs text-neutral-500">01</span>
-            <h3 className="mt-2 text-lg font-semibold">Connect GitHub</h3>
+            <h3 className="mt-2 text-lg font-semibold">Point at a repo</h3>
             <p className="mt-2 text-sm text-neutral-400">
-              One-click GitHub App install. Read-only access to the repos you pick. Nothing is
-              cloned to disk.
+              Hosted: one-click GitHub App, read-only. Self-hosted: a local path, or your own GitHub
+              token. Nothing is stored on disk after the scan.
             </p>
           </li>
           <li className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
             <span className="font-mono text-xs text-neutral-500">02</span>
             <h3 className="mt-2 text-lg font-semibold">Pick frameworks</h3>
             <p className="mt-2 text-sm text-neutral-400">
-              GDPR and the EU AI Act today. HIPAA, SOC 2, ISO 27001, OWASP, and PCI DSS land in Q3.
-              Combine any of the live ones in a single scan.
+              GDPR and the EU AI Act ship today. The rest are open issues — write a rule pack and
+              we&apos;ll merge it.
             </p>
           </li>
           <li className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
             <span className="font-mono text-xs text-neutral-500">03</span>
             <h3 className="mt-2 text-lg font-semibold">Read the report</h3>
             <p className="mt-2 text-sm text-neutral-400">
-              Each finding ships with file, line, severity, legal citation, and the exact code that
-              fixes it. Export as PDF for auditors.
+              Each finding ships with file, line, severity, legal citation, and the code that fixes
+              it. Export as PDF for auditors or pipe the JSON into CI.
             </p>
           </li>
         </ol>
@@ -164,14 +224,23 @@ export default async function LandingPage() {
       <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-8">
         <h2 className="text-2xl font-semibold tracking-tight">Frameworks</h2>
         <p className="mt-2 text-sm text-neutral-400">
-          GDPR and the EU AI Act are live today. The rest are on the build path for Q3.
+          Rule packs are plain TypeScript. Adding a framework is one file plus tests — see{" "}
+          <Link
+            href={`${GITHUB_URL}/blob/main/src/lib/rules`}
+            className="text-neutral-300 hover:text-neutral-100"
+          >
+            src/lib/rules
+          </Link>
+          .
         </p>
 
         <div className="mt-6 space-y-4">
           <div>
-            <p className="font-mono text-xs tracking-wider text-emerald-400/70 uppercase">Live</p>
+            <p className="font-mono text-xs tracking-wider text-emerald-400/70 uppercase">
+              Shipped
+            </p>
             <ul className="mt-2 flex flex-wrap gap-2">
-              {FRAMEWORKS_LIVE.map((f) => (
+              {FRAMEWORKS_SHIPPED.map((f) => (
                 <li
                   key={f}
                   className="rounded-full border border-emerald-700/60 bg-emerald-950/30 px-3 py-1 font-mono text-xs text-emerald-100"
@@ -182,9 +251,11 @@ export default async function LandingPage() {
             </ul>
           </div>
           <div>
-            <p className="font-mono text-xs tracking-wider text-neutral-500 uppercase">Coming Q3</p>
+            <p className="font-mono text-xs tracking-wider text-neutral-500 uppercase">
+              Open issues · PRs welcome
+            </p>
             <ul className="mt-2 flex flex-wrap gap-2">
-              {FRAMEWORKS_SOON.map((f) => (
+              {FRAMEWORKS_OPEN.map((f) => (
                 <li
                   key={f}
                   className="rounded-full border border-neutral-700 bg-neutral-950 px-3 py-1 font-mono text-xs text-neutral-400"
@@ -203,20 +274,24 @@ export default async function LandingPage() {
           Find out what is in your repo before your auditor does.
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-neutral-400">
-          Start with the public sample report on OWASP NodeGoat, or connect your own repo.
+          Browse the public sample report on OWASP NodeGoat, clone the repo, or run the hosted
+          version.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link
-            href="/sample/nodegoat"
-            className="rounded-lg bg-white px-5 py-3 text-sm font-medium text-neutral-900 hover:bg-neutral-100"
+            href={GITHUB_URL}
+            className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-medium text-neutral-900 hover:bg-neutral-100"
           >
-            See the sample report →
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.3 1.9 1.3 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.3-3.2-.1-.3-.6-1.6.1-3.3 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.2 3 .1 3.3.8.8 1.3 1.9 1.3 3.2 0 4.7-2.8 5.7-5.5 6 .4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3" />
+            </svg>
+            Star on GitHub
           </Link>
           <Link
-            href="/showcase"
+            href="/sample/nodegoat"
             className="rounded-lg border border-neutral-700 bg-neutral-900 px-5 py-3 text-sm font-medium text-neutral-100 hover:border-neutral-600"
           >
-            Browse showcase
+            See the sample report →
           </Link>
         </div>
       </section>

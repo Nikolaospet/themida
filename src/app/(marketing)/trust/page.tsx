@@ -92,8 +92,8 @@ const FACTS: FactRow[] = [
     q: "Have you been audited?",
     a: (
       <>
-        Not yet. SOC 2 Type I is on our roadmap once we close paid revenue. We will not claim a
-        compliance badge before we hold the report.
+        Not yet. SOC 2 Type I is on our roadmap once the hosted version has paid revenue. We will
+        not claim a compliance badge before we hold the report.
       </>
     ),
   },
@@ -270,10 +270,10 @@ export default function TrustPage() {
             See a sample report →
           </Link>
           <Link
-            href="/pricing"
+            href="https://github.com/Nikolaospet/themida"
             className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-100"
           >
-            View pricing
+            View on GitHub
           </Link>
         </div>
       </section>

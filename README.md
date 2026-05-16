@@ -1,262 +1,223 @@
 # Themida
 
-Developer-first compliance intelligence platform.
-Connect a GitHub repo, get a full GDPR / HIPAA / SOC 2 / ISO 27001 / OWASP /
-PCI DSS / EU AI Act audit report — exact file, exact line, exact fix.
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPL%20v3-blue.svg)](./LICENSE)
+[![Status](https://img.shields.io/badge/status-alpha-orange.svg)](#status)
 
-> Status: **Phase 0 — foundations**. Not production-ready.
+> **Open-source compliance scanner for your codebase.**
+> Point it at a GitHub repo. Get back every GDPR / EU AI Act issue with the
+> exact file, the exact line, the legal article, and the code that fixes it.
 
-See [`PRD.md`](./PRD.md) for the full product spec and
-[`CLAUDE.md`](./CLAUDE.md) for the engineering blueprint.
-Architectural decisions live in [`docs/adr/`](./docs/adr/).
+```
+src/auth/login.ts:41
+  CRITICAL  GDPR Art. 5(1)(f), 32(1)(a)  Password hashed with broken MD5
+  Maximum fine: €20M or 4% of revenue
+  Fix → bcrypt at cost 12+, or Argon2id
+```
 
-## Stack
+Vanta and Drata check that you have a password policy *document*. Themida
+reads the code and tells you which line stores passwords with MD5.
 
-- Next.js 16 (App Router, RSC) + React 19
-- TypeScript 5 (strict + `noUncheckedIndexedAccess`)
-- Tailwind CSS v4
-- Zod 4 (runtime validation)
-- Supabase (Postgres + Auth + Storage + Realtime)
-- Trigger.dev v3 (background jobs) — _planned_
-- Anthropic Claude (`sonnet-4-6` + `haiku-4-5`) — _planned_
-- Vitest + Testing Library
-- Vercel hosting
+- 🔍 **Line-level findings** — not "you have weak crypto somewhere"
+- ⚖️ **Legal citation** on every issue (article + maximum fine)
+- 🛠 **Suggested fix as code** — paste-ready, not prose
+- 📄 **PDF export** for auditors
+- 🏠 **Self-hostable** — clone, set an API key, scan
 
-## Requirements
+[Live sample report](https://themida.dev/sample/nodegoat) ·
+[Showcase](https://themida.dev/showcase) ·
+[Trust & security](https://themida.dev/trust)
 
-- Node.js ≥ 22
-- pnpm ≥ 10
+---
 
-## Getting started
+## Status
+
+**Alpha.** GDPR and EU AI Act rule packs work end-to-end. Hosted version is
+running on Vercel + Supabase + Trigger.dev. Expect rough edges. Not yet
+recommended for production audit submissions — use it to find real issues, not
+to certify a clean bill.
+
+---
+
+## Quickstart (self-hosted)
+
+Run a scan locally without signing up for anything except an Anthropic key.
 
 ```bash
-# 1. Install dependencies
+# 1. Clone and install
+git clone https://github.com/Nikolaospet/themida
+cd themida
 pnpm install
 
-# 2. Configure environment
+# 2. Provide an LLM key
 cp .env.example .env.local
-# fill in the required values
+# edit .env.local — ANTHROPIC_API_KEY (or OPENROUTER_API_KEY) is the only must-have
 
-# 3. Boot the local Supabase stack (Postgres + Auth + Studio)
+# 3. Boot local Supabase + apply migrations
 pnpm db:start
-
-# 4. Apply migrations
 pnpm db:reset
 
-# 5. Run the dev server
+# 4. Run the dev server
 pnpm dev
 ```
 
-Open <http://localhost:3000>. Supabase Studio runs at <http://127.0.0.1:54323>.
+Open <http://localhost:3000>, connect a GitHub repo, run a scan.
 
-> **Requirements for the local stack:** Docker Desktop must be running.
-> The Supabase CLI provisions Postgres, GoTrue, Studio, etc., as containers.
+> Docker Desktop is required for the local Supabase stack. If you just want
+> to try the scanner against a local folder without Supabase, see
+> [`docs/cli-quickstart.md`](./docs/cli-quickstart.md) *(coming)*.
 
-> **Connecting a repository** requires a registered GitHub App. Follow
-> [`docs/setup/github-app.md`](./docs/setup/github-app.md) once and
-> drop the resulting credentials into your `.env.local`.
+### Or use the hosted version
 
-## Scripts
+If you don't want to run your own stack, the hosted version at
+<https://themida.dev> runs the same source. Sign in with GitHub, scan up to
+5 repos per month for free, no credit card.
 
-| Command             | Purpose                                |
-| ------------------- | -------------------------------------- |
-| `pnpm dev`          | Run the Next.js dev server             |
-| `pnpm build`        | Production build                       |
-| `pnpm start`        | Serve the production build             |
-| `pnpm lint`         | Run ESLint                             |
-| `pnpm lint:fix`     | Run ESLint with `--fix`                |
-| `pnpm typecheck`    | Run `tsc --noEmit`                     |
-| `pnpm format`       | Format the codebase with Prettier      |
-| `pnpm format:check` | Check formatting without writing       |
-| `pnpm secretlint`   | Scan for secrets locally               |
-| `pnpm test`         | Run unit tests once                    |
-| `pnpm test:watch`   | Run unit tests in watch mode           |
-| `pnpm db:start`     | Boot local Supabase stack              |
-| `pnpm db:stop`      | Stop local Supabase stack              |
-| `pnpm db:reset`     | Drop + recreate local DB and re-apply migrations |
-| `pnpm db:types`     | Regenerate `src/types/database.ts` from local DB |
+---
+
+## How it works
+
+```
+┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│  Fetch   │───▶│  Filter  │───▶│  Analyse │───▶│  Verify  │
+└──────────┘    └──────────┘    └──────────┘    └──────────┘
+ GitHub Trees    Relevance       LLM passes      Drop hallucinations
+ + blob API      scoring         (recon →        + already-mitigated
+                                  deep scan)
+```
+
+1. **Fetch** — Trees API enumerates files; raw-blob API pulls only the ones
+   the relevance filter flags. Cached by blob SHA — re-scans only re-fetch
+   what changed.
+2. **Filter** — `node_modules`, lockfiles, binaries, generated files never
+   leave GitHub. Each remaining file is scored against the chosen frameworks.
+3. **Analyse** — A three-pass LLM pipeline (recon → deep scan → verify) runs
+   concurrent chunks of ≤ 20K tokens. Anthropic (`sonnet-4-6`) by default,
+   `openrouter:google/gemma-4-31b-it:free` for cost-free local dev.
+4. **Verify** — A final pass drops paths the model hallucinated and findings
+   that are already mitigated nearby in the same file.
+
+The full data lifecycle, sub-processors, and threat model live on
+[`/trust`](https://themida.dev/trust) and [`SECURITY.md`](./SECURITY.md).
+
+---
+
+## Frameworks
+
+| Framework | Status | Rules |
+|-----------|--------|-------|
+| GDPR (EU 2016/679) | ✅ Shipped | 5 |
+| EU AI Act | ✅ Shipped | 5 |
+| HIPAA | 🟡 Open issue — PRs welcome | – |
+| SOC 2 | 🟡 Open issue — PRs welcome | – |
+| ISO 27001 | 🟡 Open issue — PRs welcome | – |
+| OWASP Top 10 | 🟡 Open issue — PRs welcome | – |
+| PCI DSS | 🟡 Open issue — PRs welcome | – |
+
+**Adding a framework is one file plus tests.** Rule packs are plain
+TypeScript — see [`src/lib/rules/gdpr.ts`](./src/lib/rules/gdpr.ts) for the
+reference implementation. We will happily merge well-tested rule packs from
+contributors.
+
+---
+
+## Stack
+
+- **Next.js 16** (App Router + RSC) + **React 19** + **TypeScript 5** strict
+- **Tailwind CSS v4**
+- **Supabase** (Postgres + Auth + Storage + Realtime + RLS)
+- **Trigger.dev v3** for background scans
+- **Anthropic Claude** (default) or **OpenRouter** for the LLM passes
+- **Zod 4** for runtime validation
+- **Vitest** + Testing Library
+
+Requires Node.js ≥ 22 and pnpm ≥ 10.
+
+---
 
 ## Project structure
 
 ```
 themida/
 ├── src/
-│   ├── app/                Next.js App Router routes (auth, dashboard, marketing)
-│   ├── lib/                Utilities, Supabase + crypto + scanner clients
-│   ├── types/              Generated DB types
-│   ├── env.ts              Zod-validated env vars (lazy)
-│   └── middleware.ts       Supabase session refresh
-├── supabase/
-│   ├── config.toml         Local stack config
-│   └── migrations/         SQL migrations (versioned)
-├── public/                 Static assets
-├── docs/adr/               Architecture decision records
-├── .github/workflows/      CI: ci, codeql, gitleaks
-└── .husky/                 git hooks
+│   ├── app/                 Next.js App Router routes
+│   ├── components/          UI (dashboard, reports/ReportPDF)
+│   ├── lib/
+│   │   ├── rules/           Compliance rule packs (gdpr.ts, eu-ai-act.ts)
+│   │   ├── scanner/         Filter, chunker, three-pass pipeline
+│   │   ├── github/          Trees + blob fetcher, file cache
+│   │   ├── crypto/          AES-256-GCM token encryption
+│   │   └── supabase/        Server / browser / admin clients
+│   ├── trigger/             Trigger.dev jobs
+│   └── types/database.ts    Generated Supabase types
+├── supabase/migrations/     Versioned SQL migrations
+├── evals/repos/             Hand-labelled fixture repos for accuracy evals
+└── docs/adr/                Architecture decision records
 ```
 
-## Quality gates
-
-- **Pre-commit:** `lint-staged` runs ESLint, Prettier and `secretlint` on
-  staged files.
-- **commit-msg:** `commitlint` enforces
-  [Conventional Commits](https://www.conventionalcommits.org/).
-- **Pre-push:** `tsc --noEmit` + `vitest run`.
-- **CI:** lint + typecheck + secretlint + test + build on every PR.
-- **Security:** CodeQL + gitleaks on every PR and weekly.
-- **Dependencies:** Dependabot grouped weekly updates.
-
-## Observability
-
-- **Logger:** Pino — server-side structured JSON logs. Pretty output in
-  development, plain JSON in test and production. Sensitive fields
-  (`password`, `token`, `apiKey`, `authorization`) are auto-redacted.
-  Use `import { childLogger } from "@/lib/logger"` to attach correlation
-  IDs (`scanId`, `userId`, `requestId`).
-- **Errors / traces:** Sentry (EU instance) via `@sentry/nextjs`. Set
-  `NEXT_PUBLIC_SENTRY_DSN` to enable. Source maps are uploaded at
-  build time when `SENTRY_AUTH_TOKEN` + `SENTRY_ORG` + `SENTRY_PROJECT`
-  are set. Local dev keeps the SDK disabled unless
-  `SENTRY_FORCE_ENABLE=1` is exported.
-- **Cost tracking:** Every Anthropic call (when wired in Phase 3b)
-  goes through `src/lib/observability/cost-tracker.ts`, which records
-  the call in `public.claude_api_calls` with input / output / cached
-  tokens and the cost in cents. Pricing is integer cents per 1M
-  tokens to avoid floating-point rounding.
-
-## Compliance rules + evals
-
-The rules engine lives under `src/lib/rules/` (immutable
-`ComplianceRule` data) and `src/lib/scanner/` (file filter +
-chunker). The first 10 rules ship in this codebase: 5 GDPR rules
-(`GDPR-001`–`GDPR-005`) and 5 EU AI Act rules
-(`AI-ACT-001`–`AI-ACT-005`). New rules go in
-`src/lib/rules/<framework>.ts` and are registered automatically via
-the framework arrays.
-
-Hand-labelled fixture repositories live under `evals/repos/<id>/`,
-each shipping a `manifest.json` listing expected findings + a `code/`
-tree we evaluate against. Phase 3a's eval only validates that the
-file filter surfaces the files where findings are expected — actual
-detection lands in Phase 3b once the Claude integration is wired.
-
-Run the suite via `pnpm evals:run` (it is also part of `pnpm test`).
-
-## Repo file fetcher (Phase 1.6)
-
-`src/lib/github/fetcher.ts` enumerates a repo's files via the GitHub
-**Trees API** (one HTTP call) and pulls the bytes of a chosen subset
-in concurrency-limited batches via the **raw blob** endpoint. Repos
-larger than 5 K files are rejected for now — the tarball fallback
-ships in Phase 3c.
-
-Each fetched blob is gzipped and written to `public.repo_file_cache`
-keyed by `(repo_id, blob_sha)`. Re-scans only re-fetch blobs whose
-SHA has changed; for an unchanged repo the second scan reads
-exclusively from cache.
-
-To inspect the live numbers (file count, total bytes, token estimate,
-cache hit rate) on your most recently connected repo:
-
-```bash
-pnpm dev:fetch
-```
-
-The script is read-only against GitHub and writes only to
-`repo_file_cache`. It uses the service-role admin client, so it runs
-locally regardless of the authenticated session — but it requires that
-you've completed the GitHub App install flow at least once (otherwise
-no `repos` row exists for it to read).
-
-## AI scanner (Phase 3b)
-
-The compliance scanner uses **Gemma 4 31B Instruct** via the
-**OpenRouter** gateway (`google/gemma-4-31b-it:free`). The pipeline
-is the classic three-pass setup:
-
-1. **Recon** — one LLM call, file-signature input, returns up to 15
-   most-suspect paths.
-2. **Deep scan** — runs in parallel chunks of ≤ 20 K tokens with a
-   concurrency cap of 2; each chunk returns `RawFinding[]`.
-3. **Verification** — a final pass that drops hallucinated paths and
-   already-mitigated cases. Findings are batched at 30/group.
-
-Every call is logged to `public.llm_api_calls` with `provider`,
-`model`, `pass`, token usage, duration and (when a paid model is in
-use) cost in cents.
-
-### Config
-
-```env
-OPENROUTER_API_KEY=...                       # required
-OPENROUTER_MODEL=google/gemma-4-31b-it:free  # default
-```
-
-### End-to-end run
-
-```bash
-pnpm dev:scan
-```
-
-Picks the most-recently-connected repo, runs the full pipeline,
-prints scan stats + the top findings.
-
-### Live eval test
-
-```bash
-LIVE_LLM=1 pnpm test evals/live-llm.test.ts
-```
-
-Spends 3 free-tier calls (recon + deep + verify) against
-`evals/repos/002-md5-password-leftover/`. Passes when at least one
-verified `GDPR-001` finding is returned.
-
-### What is NOT in Phase 3b
-
-- Trigger.dev wiring — Phase 4.
-- Credit deduction + idempotency — Phase 4.
-- API route + Realtime UI — Phase 5.
-- Eval CI gate with false-positive thresholds — Phase 3c.
-- Prompt caching — re-evaluated when we move off the free tier.
+---
 
 ## Contributing
 
-See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+Contributions welcome — especially:
 
-## Phase 4-A — manual smoke test
+- **New rule packs** for HIPAA, SOC 2, ISO 27001, OWASP, PCI DSS
+- **Eval fixtures** under `evals/repos/` so we can measure detection accuracy
+- **Bug reports** with a reproducer repo (public or anonymised)
 
-After running migrations and starting both dev servers
-(`pnpm dev` in one terminal, `pnpm trigger:dev` in another):
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the workflow, coding
+conventions, and DCO sign-off requirement.
 
-1. Log in via GitHub OAuth.
-2. Install the Themida GitHub App on a test account and connect at
-   least one repository.
-3. Open the repo's detail page (`/repos/[id]`) — click **Run scan**.
-4. Watch the progress stepper advance:
-   fetching → filtering → recon → deep_scan → verifying.
-5. During `deep_scan`, the file counter should advance
-   (e.g. *Analyzing 23 of 47 files*).
-6. On completion, land on the results page. Verify:
-   - Compliance score displays in the correct color band.
-   - Severity-count pills match the issue list.
-   - Clicking a severity pill toggles it (URL updates with
-     `?severity=…`).
-   - The **Sort** dropdown re-orders the list (URL updates with
-     `?sort=file`).
-   - Any `file:line` link opens the matching GitHub blob line.
-7. Click **Run scan** again while the previous one is pending —
-   the server action rejects, a toast surfaces, no second scan is
-   queued.
-8. Run 3 scans in 24h — the 4th attempt is rejected with a
-   daily-cap toast.
-9. Set `MAX_DAILY_SPEND_CENTS=0` in the env and restart — any scan
-   attempt is rejected with the kill-switch toast.
+By contributing, you agree your contributions are licensed under AGPL-3.0
+under the project's contribution terms.
+
+---
+
+## Roadmap
+
+The short list, in rough priority order:
+
+- Local-folder scanning (no Supabase required) for the OSS CLI path
+- Additional rule packs (HIPAA → SOC 2 → ISO 27001 first)
+- VS Code extension that surfaces findings inline
+- GitHub Action so scans gate PRs in CI
+- Multi-LLM provider abstraction (Anthropic, OpenAI, local llama.cpp)
+
+Vote on what you want next via GitHub issues.
+
+---
+
+## Hosted version
+
+Themida.dev is the managed instance — same code, on someone else's machine.
+We run it because some users would rather not babysit Postgres + queues.
+The hosted version exists to fund the open-source one.
+
+Self-hosting is not "the limited tier" — it's the full product, AGPL-licensed.
+
+---
 
 ## Security
 
-See [`SECURITY.md`](./SECURITY.md). Do **not** open public issues for
-suspected vulnerabilities.
+Found a vulnerability? Email <security@themida.dev>. We acknowledge within
+one business day and we will not lawyer up at researchers acting in good
+faith. Full policy: [`SECURITY.md`](./SECURITY.md).
+
+---
 
 ## License
 
-Proprietary. © AlkeLabs. All rights reserved.
+[**GNU AGPL v3**](./LICENSE) · © 2026 Nikos P.
+
+In plain English:
+
+- ✅ **Use it** — for personal, internal, or commercial purposes
+- ✅ **Modify it, fork it, run it** — anywhere you want
+- ✅ **Self-host as a service for your own org**
+- ⚠️ **Run a modified version as a public network service?** AGPL requires
+  you to publish your changes under the same license. This is the rule that
+  keeps Themida from being closed-source-cloned by a bigger vendor.
+- 💼 **Need a commercial license?** If AGPL's copyleft clause is a blocker
+  (e.g. you want to embed Themida in a closed-source SaaS), reach out at
+  <hello@themida.dev> for a commercial license.
+
+The full legal text is in [`LICENSE`](./LICENSE).
