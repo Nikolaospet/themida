@@ -396,7 +396,7 @@ AGPL allows commercial use and forking. It only restricts one thing: running
 a modified version as a *public network service* without sharing your
 changes. This keeps Themida from being closed-source-cloned by a bigger
 vendor. If AGPL is a blocker for your use case, a commercial license is
-available — email <hello@themida.dev>.
+available — email <nikolaospetridhs@gmail.com>.
 
 **Can I run this against a private repo without giving anyone a token?**
 Yes — use the CLI path (`pnpm dev:scan` with a local clone), or set up the
@@ -438,7 +438,7 @@ under the project's contribution terms.
 
 ## Security
 
-Found a vulnerability? Email <security@themida.dev>. We acknowledge within
+Found a vulnerability? Email <nikolaospetridhs@gmail.com>. We acknowledge within
 one business day and we will not lawyer up at researchers acting in good
 faith. Full policy: [`SECURITY.md`](./SECURITY.md).
 
@@ -446,7 +446,7 @@ faith. Full policy: [`SECURITY.md`](./SECURITY.md).
 
 ## License
 
-[**GNU AGPL v3**](./LICENSE) · © 2026 Nikos P.
+[**GNU AGPL v3**](./LICENSE) · © 2026 Nikolaos Petridis
 
 In plain English:
 
@@ -458,6 +458,6 @@ In plain English:
   keeps Themida from being closed-source-cloned by a bigger vendor.
 - 💼 **Need a commercial license?** If AGPL's copyleft clause is a blocker
   (e.g. you want to embed Themida in a closed-source SaaS), reach out at
-  <hello@themida.dev>.
+  <nikolaospetridhs@gmail.com>.
 
 The full legal text is in [`LICENSE`](./LICENSE).

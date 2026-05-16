@@ -7,7 +7,7 @@ If you believe you have found a security vulnerability in Themida, please
 
 Instead, email the maintainer privately:
 
-- **security@themida.dev**
+- **nikolaospetridhs@gmail.com**
 
 If that mailbox bounces, ping the maintainer via a GitHub Issue titled "Security
 contact" (without disclosing the vulnerability details) and we'll respond with
