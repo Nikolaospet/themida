@@ -55,8 +55,8 @@ scanner pipeline (recon → deep scan → verify) is provider-agnostic — bring
 your own LLM key (Anthropic, OpenAI, OpenRouter, Groq, Together, vLLM,
 llama.cpp, …). Expect rough edges — issues and PRs welcome.
 
-Not yet recommended for production audit *submissions*. Use it to find real
-issues, not to certify a clean bill.
+Don't bet your audit on it yet, but it does find real issues. Treat
+results as a starting point for a human review.
 
 ---
 
@@ -454,9 +454,9 @@ under the project's contribution terms.
 
 ## Security
 
-Found a vulnerability? Email <nikolaospetridhs@gmail.com>. We acknowledge within
-one business day and we will not lawyer up at researchers acting in good
-faith. Full policy: [`SECURITY.md`](./SECURITY.md).
+Found a vulnerability? Email <nikolaospetridhs@gmail.com> — please don't
+open a public issue. Good-faith reports are always welcome and I'll get
+back to you quickly. Full policy: [`SECURITY.md`](./SECURITY.md).
 
 ---
 
