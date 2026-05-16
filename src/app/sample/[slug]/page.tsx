@@ -48,12 +48,36 @@ export default async function SamplePage({ params }: Props) {
             <h1 className="mt-1 text-3xl font-semibold">{sample.repoFullName}</h1>
             <p className="mt-2 text-sm text-neutral-400">{sample.blurb}</p>
           </div>
-          <Link
-            href="/login"
-            className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-100"
-          >
-            Scan your own repo →
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={`/api/sample/${sample.slug}/pdf`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-100 hover:border-neutral-600"
+              download
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Download PDF
+            </a>
+            <Link
+              href="/login"
+              className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-100"
+            >
+              Scan your own repo →
+            </Link>
+          </div>
         </section>
 
         <Suspense fallback={<div className="text-sm text-neutral-500">Loading report…</div>}>
