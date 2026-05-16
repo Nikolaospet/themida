@@ -1,8 +1,11 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// NOTE: still imports the named provider export directly so we can keep
+// the existing fine-grained network-failure / retry tests. The public
+// surface that callers use is `callLlm` from "@/lib/llm".
+import { LlmContractError, LlmRateLimitError, LlmServerError } from "../types";
 import { callAnthropic } from "./anthropic";
-import { LlmContractError, LlmRateLimitError, LlmServerError } from "./types";
 
 const recordLlmCallMock = vi.fn();
 vi.mock("@/lib/observability/cost-tracker", async () => {

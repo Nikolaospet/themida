@@ -1,7 +1,7 @@
-// Server-only by transitive dependency on the Anthropic client and
+// Server-only by transitive dependency on the LLM provider and
 // Supabase admin paths. Omitting the explicit `server-only` marker keeps
 // this module importable from CLI scripts (e.g. scripts/dev-scan.mts).
-import { callAnthropic } from "@/lib/llm/anthropic";
+import { callLlm } from "@/lib/llm";
 import { LlmJsonParseError, parseStrictJson } from "@/lib/llm/parser";
 import { buildDeepScanUserPrompt, buildSystemPrompt } from "@/lib/llm/prompts";
 import type { ComplianceRule } from "@/lib/rules/types";
@@ -57,7 +57,7 @@ async function scanChunk(
     { role: "user" as const, content: userPrompt },
   ];
 
-  const first = await callAnthropic(messages, {
+  const first = await callLlm(messages, {
     pass: "deep_scan",
     scanId: options.scanId ?? null,
     userId: options.userId ?? null,
@@ -68,7 +68,7 @@ async function scanChunk(
     parsed = parseStrictJson<DeepScanResponse>(first.text, DeepScanResponseSchema);
   } catch (err) {
     if (!(err instanceof LlmJsonParseError)) throw err;
-    const second = await callAnthropic(
+    const second = await callLlm(
       [...messages, { role: "user" as const, content: retryUserPrompt(err) }],
       { pass: "deep_scan", scanId: options.scanId ?? null, userId: options.userId ?? null },
     );

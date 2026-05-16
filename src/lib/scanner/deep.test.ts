@@ -5,13 +5,13 @@ import { GDPR_001 } from "@/lib/rules/gdpr";
 
 import { runDeepScanPass } from "./deep";
 
-const callAnthropicMock = vi.fn();
-vi.mock("@/lib/llm/anthropic", () => ({
-  callAnthropic: (...args: unknown[]) => callAnthropicMock(...args),
+const callLlmMock = vi.fn();
+vi.mock("@/lib/llm", () => ({
+  callLlm: (...args: unknown[]) => callLlmMock(...args),
 }));
 
 beforeEach(() => {
-  callAnthropicMock.mockReset();
+  callLlmMock.mockReset();
 });
 
 function deepScanResponse(ruleId: string, file: string) {
@@ -56,7 +56,7 @@ function deepScanResponse(ruleId: string, file: string) {
 
 describe("runDeepScanPass", () => {
   it("flattens findings from every chunk", async () => {
-    callAnthropicMock
+    callLlmMock
       .mockResolvedValueOnce(deepScanResponse("GDPR-001", "src/a.ts"))
       .mockResolvedValueOnce(deepScanResponse("GDPR-001", "src/b.ts"));
 
@@ -69,13 +69,13 @@ describe("runDeepScanPass", () => {
     );
 
     expect(findings.map((f) => f.file_path).sort()).toEqual(["src/a.ts", "src/b.ts"]);
-    expect(callAnthropicMock).toHaveBeenCalledTimes(2);
+    expect(callLlmMock).toHaveBeenCalledTimes(2);
   });
 
   it("respects the concurrency cap (default 2)", async () => {
     let inFlight = 0;
     let maxInFlight = 0;
-    callAnthropicMock.mockImplementation(async (_messages: unknown, options: { pass: string }) => {
+    callLlmMock.mockImplementation(async (_messages: unknown, options: { pass: string }) => {
       expect(options.pass).toBe("deep_scan");
       inFlight += 1;
       maxInFlight = Math.max(maxInFlight, inFlight);
@@ -94,11 +94,11 @@ describe("runDeepScanPass", () => {
   it("returns empty list when given no chunks", async () => {
     const findings = await runDeepScanPass([], [GDPR_001]);
     expect(findings).toEqual([]);
-    expect(callAnthropicMock).not.toHaveBeenCalled();
+    expect(callLlmMock).not.toHaveBeenCalled();
   });
 
   it("retries a chunk once on JSON parse failure", async () => {
-    callAnthropicMock
+    callLlmMock
       .mockResolvedValueOnce({
         text: "not json",
         inputTokens: 0,
@@ -115,6 +115,6 @@ describe("runDeepScanPass", () => {
       [GDPR_001],
     );
     expect(findings).toHaveLength(1);
-    expect(callAnthropicMock).toHaveBeenCalledTimes(2);
+    expect(callLlmMock).toHaveBeenCalledTimes(2);
   });
 });
