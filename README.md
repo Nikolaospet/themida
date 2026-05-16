@@ -4,7 +4,7 @@
 [![Status](https://img.shields.io/badge/status-alpha-orange.svg)](#status)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
 
-> **Open-source compliance scanner for your codebase.**
+> **A personal project exploring LLM-driven compliance scanning.**
 > Point it at a GitHub repo. Get back every GDPR / EU AI Act issue with the
 > exact file, the exact line, the legal article, and the code that fixes it.
 
@@ -15,13 +15,14 @@ src/auth/login.ts:41
   Fix → bcrypt at cost 12+, or Argon2id
 ```
 
-Vanta and Drata check that you have a password policy *document*. Themida
-reads the code and tells you which line stores passwords with MD5.
+This is a hobby/learning project — not a product, not a company. I'm building
+it in the open and contributions are very welcome, especially extra rule
+packs and eval fixtures.
 
 - 🔍 **Line-level findings** — not "you have weak crypto somewhere"
 - ⚖️ **Legal citation** on every issue (article + maximum fine)
 - 🛠 **Suggested fix as code** — paste-ready, not prose
-- 📄 **PDF export** for auditors
+- 📄 **PDF export** for sharing reports
 - 🏠 **Self-hostable** — bring your own LLM key, your code never leaves your machine
 
 ---
@@ -407,11 +408,12 @@ scanner makes are to GitHub (to fetch code, if you point it at a remote
 repo) and to your chosen LLM provider.
 
 **Why AGPL-3.0 instead of MIT?**
-AGPL allows commercial use and forking. It only restricts one thing: running
-a modified version as a *public network service* without sharing your
-changes. This keeps Themida from being closed-source-cloned by a bigger
-vendor. If AGPL is a blocker for your use case, a commercial license is
-available — email <nikolaospetridhs@gmail.com>.
+AGPL keeps the project (and any fork run as a public network service)
+open-source. If you run a modified version privately or commercially it's
+fine; only public network deployments have to share their changes. This
+is a fairly standard choice for open-source tools (Plausible, PostHog,
+Cal.com, Supabase). If you want to use Themida under different terms,
+open an issue and let's talk.
 
 **Can I run this against a private repo without giving anyone a token?**
 Yes — use the CLI path (`pnpm dev:scan` with a local clone) and the
@@ -466,12 +468,11 @@ In plain English:
 
 - ✅ **Use it** — for personal, internal, or commercial purposes
 - ✅ **Modify it, fork it, run it** — anywhere you want
-- ✅ **Self-host as a service for your own org**
+- ✅ **Self-host it as a service for your own org**
 - ⚠️ **Run a modified version as a public network service?** AGPL requires
-  you to publish your changes under the same license. This is the rule that
-  keeps Themida from being closed-source-cloned by a bigger vendor.
-- 💼 **Need a commercial license?** If AGPL's copyleft clause is a blocker
-  (e.g. you want to embed Themida in a closed-source SaaS), reach out at
-  <nikolaospetridhs@gmail.com>.
+  you to publish your changes under the same license.
+
+If AGPL doesn't fit your use case, open an issue or reach out at
+<nikolaospetridhs@gmail.com> and we'll figure something out.
 
 The full legal text is in [`LICENSE`](./LICENSE).
