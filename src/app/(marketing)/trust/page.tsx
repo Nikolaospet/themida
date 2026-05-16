@@ -256,8 +256,8 @@ export default function TrustPage() {
         <h2 className="text-2xl font-semibold tracking-tight">Found a security issue?</h2>
         <p className="mx-auto mt-3 max-w-xl text-sm text-neutral-400">
           Email{" "}
-          <a className="text-neutral-200 hover:underline" href="mailto:security@themida.dev">
-            security@themida.dev
+          <a className="text-neutral-200 hover:underline" href="mailto:nikolaospetridhs@gmail.com">
+            nikolaospetridhs@gmail.com
           </a>
           . We acknowledge within one business day and we won&apos;t lawyer up at researchers acting
           in good faith.
