@@ -7,7 +7,11 @@ If you believe you have found a security vulnerability in Themida, please
 
 Instead, email the maintainer privately:
 
-- **security@alkelabs.com** _(planned — replace once mailbox is live)_
+- **security@themida.dev**
+
+If that mailbox bounces, ping the maintainer via a GitHub Issue titled "Security
+contact" (without disclosing the vulnerability details) and we'll respond with
+an alternate channel.
 
 Please include:
 
@@ -48,7 +52,7 @@ We follow a coordinated disclosure model:
 
 - Strict Content-Security-Policy and HSTS preload.
 - All env vars validated by Zod on boot — fail-fast.
-- GitHub OAuth tokens encrypted at rest with AES-256.
+- GitHub App installation tokens encrypted at rest with AES-256-GCM.
 - Row-level security on every database table from migration 0001.
 - Pre-commit secret scanning (`secretlint`) and CI scanning (`gitleaks`,
   `CodeQL`).
