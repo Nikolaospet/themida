@@ -5,8 +5,8 @@
  * mimic the shape of ScanRow + IssueCardData so the existing
  * <ScanResults> component renders without any DB query or auth.
  *
- * Used by /sample/[slug] to give visitors (investors, prospects) a
- * concrete proof of what Themida produces, without requiring signup.
+ * Used by /sample/[slug] to give visitors a concrete proof of what Themida
+ * produces, without requiring signup.
  */
 
 import type { IssueCardData } from "@/components/dashboard/IssueCard";

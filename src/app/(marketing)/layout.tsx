@@ -12,11 +12,15 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             <Link href="/showcase" className="text-neutral-400 hover:text-neutral-100">
               Showcase
             </Link>
-            <Link href="/pricing" className="text-neutral-400 hover:text-neutral-100">
-              Pricing
-            </Link>
             <Link href="/trust" className="text-neutral-400 hover:text-neutral-100">
               Trust
+            </Link>
+            <Link
+              href="https://github.com/Nikolaospet/themida"
+              className="text-neutral-400 hover:text-neutral-100"
+              aria-label="GitHub"
+            >
+              GitHub
             </Link>
             <Link
               href="/login"
@@ -37,11 +41,11 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             <Link href="/showcase" className="hover:text-neutral-300">
               Showcase
             </Link>
-            <Link href="/pricing" className="hover:text-neutral-300">
-              Pricing
-            </Link>
             <Link href="/trust" className="hover:text-neutral-300">
               Trust
+            </Link>
+            <Link href="https://github.com/Nikolaospet/themida" className="hover:text-neutral-300">
+              GitHub
             </Link>
             <Link href="/sample/nodegoat" className="hover:text-neutral-300">
               Sample report
