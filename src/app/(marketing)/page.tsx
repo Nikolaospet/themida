@@ -28,14 +28,15 @@ export default async function LandingPage() {
             Open source · AGPL-3.0
           </p>
           <h1 className="mt-4 text-5xl font-semibold tracking-tight text-neutral-50 sm:text-6xl lg:text-7xl">
-            GDPR fines hit €20M.
+            Compliance findings at line-level.
           </h1>
           <p className="mt-4 max-w-xl text-2xl tracking-tight text-neutral-300 sm:text-3xl">
-            We tell you exactly which line of code triggers them.
+            File, line, legal article, and a working fix.
           </p>
           <p className="mt-6 max-w-xl text-base text-neutral-400">
-            Themida is an open-source compliance scanner. Point it at a GitHub repo and it returns
-            every issue with the file, the line, the legal article, and the code that fixes it.
+            Themida is a personal open-source project exploring LLM-driven compliance scanning.
+            Point it at a GitHub repo and it returns every GDPR / EU AI Act issue with the file, the
+            line, the legal article, and the code that fixes it.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -63,11 +64,7 @@ export default async function LandingPage() {
           </div>
 
           <p className="mt-5 font-mono text-xs text-neutral-500">
-            Self-host in 5 minutes, or use the managed version free at{" "}
-            <Link href="/login" className="text-neutral-300 hover:text-neutral-100">
-              sign in
-            </Link>
-            .
+            Self-host in 5 minutes — no signup required.
           </p>
         </div>
 
@@ -114,32 +111,19 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* CONTRAST --------------------------------------------------------- */}
-      <section className="grid gap-6 sm:grid-cols-2">
-        <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
-          <p className="font-mono text-xs tracking-wider text-neutral-500 uppercase">
-            What others do
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight">
-            Vanta and Drata read your policies.
-          </h2>
-          <p className="mt-3 text-neutral-400">
-            They check that you have a password policy document. They do not check whether your
-            login route stores passwords with MD5.
-          </p>
-        </div>
-        <div className="rounded-2xl border border-emerald-900/60 bg-emerald-950/20 p-6">
-          <p className="font-mono text-xs tracking-wider text-emerald-400/70 uppercase">
-            What Themida does
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-emerald-50">
-            We read your code.
-          </h2>
-          <p className="mt-3 text-emerald-100/70">
-            Every finding has a file path, a line number, a code snippet, and a working fix you can
-            paste into a PR.
-          </p>
-        </div>
+      {/* APPROACH ---------------------------------------------------------- */}
+      <section className="rounded-2xl border border-emerald-900/60 bg-emerald-950/20 p-6">
+        <p className="font-mono text-xs tracking-wider text-emerald-400/70 uppercase">
+          The approach
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-emerald-50">
+          Read the actual code, not the policy doc.
+        </h2>
+        <p className="mt-3 text-emerald-100/70">
+          Themida is a three-pass LLM pipeline (recon → deep scan → verify) that runs against your
+          repo and produces findings with a file path, a line number, a code snippet, and a working
+          fix you can paste into a PR.
+        </p>
       </section>
 
       {/* SELF-HOST quickstart -------------------------------------------- */}
