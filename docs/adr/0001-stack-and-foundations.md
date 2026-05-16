@@ -13,7 +13,7 @@ violations at file + line level. The product needs to:
 - Ship an MVP fast while staying maintainable and scalable.
 - Handle sensitive customer code, OAuth tokens, and PII safely.
 - Support async, long-running scans (60–300 s) without blocking HTTP requests.
-- Integrate AI (Anthropic Claude) cost-efficiently via prompt caching.
+- Integrate an LLM provider cost-efficiently via prompt caching where supported.
 - Reach product-market fit with a small team (founder-led for now).
 
 ## Decision
@@ -39,11 +39,15 @@ violations at file + line level. The product needs to:
 - **Octokit** (planned) — typed GitHub API client, supports GitHub App auth
   later (preferred over raw OAuth tokens at scale).
 
-### AI
+### LLM
 
-- **Anthropic SDK** with `claude-sonnet-4-6` for deep scans and
-  `claude-haiku-4-5` for cheap reconnaissance. Prompt caching enabled on the
-  static rules prompt to cut input cost by 70–90 %.
+- The scanner is provider-agnostic. The default reference implementation
+  targets a fast / cheap model for reconnaissance and a stronger model
+  for deep scans, with prompt caching enabled on the static rules
+  prompt to cut input cost by 70–90 % on providers that support it.
+- Provider selection is driven by env vars; self-hosters can plug in
+  any Chat-Completions-shaped backend (OpenAI, OpenRouter, vLLM, Groq,
+  Together, a local model, etc.).
 
 ### Tooling
 
@@ -81,8 +85,9 @@ violations at file + line level. The product needs to:
   Deferred until query complexity justifies the extra surface area.
 - **Remix / SvelteKit** — equally capable but Vercel + RSC ergonomics on Next.js
   are better for our team and stack.
-- **OpenAI** instead of Claude — Claude has a stronger code understanding track
-  record, 1 M context window, and ergonomic prompt caching.
+- **OpenAI-only** vs **provider-agnostic** — we chose a provider-agnostic
+  facade so self-hosters can pick their own backend. Adds a small layer of
+  indirection in exchange for not locking the OSS project to a single vendor.
 - **Self-hosted Postgres + custom auth** — too much undifferentiated work for
   Phase 1.
 
