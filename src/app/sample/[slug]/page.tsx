@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { ScanResults } from "@/app/(dashboard)/scan/[id]/ScanResults";
 import { getSample, listSamples } from "@/lib/sample/data";
@@ -55,13 +56,15 @@ export default async function SamplePage({ params }: Props) {
           </Link>
         </section>
 
-        <ScanResults
-          scan={sample.scan}
-          issues={sample.issues}
-          repoFullName={sample.repoFullName}
-          defaultBranch={sample.defaultBranch}
-          commitSha={sample.commitSha}
-        />
+        <Suspense fallback={<div className="text-sm text-neutral-500">Loading report…</div>}>
+          <ScanResults
+            scan={sample.scan}
+            issues={sample.issues}
+            repoFullName={sample.repoFullName}
+            defaultBranch={sample.defaultBranch}
+            commitSha={sample.commitSha}
+          />
+        </Suspense>
       </main>
 
       <footer className="mt-16 border-t border-neutral-800">
