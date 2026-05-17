@@ -1,0 +1,75 @@
+name: Bug report
+description: Something does not work the way it should
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. A clear reproducer is the
+        single biggest factor in how fast this gets fixed.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: A clear, short description of the bug.
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-expected
+    attributes:
+      label: What you expected to happen
+      description: One or two lines.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps starting from a clean state.
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproducer
+    attributes:
+      label: Minimal reproducer
+      description: A code snippet, command, or link to a tiny public repo that reproduces the issue.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Fill each line.
+      value: |
+        - Themida commit / branch:
+        - Node version (`node --version`):
+        - pnpm version (`pnpm --version`):
+        - OS:
+        - LLM provider (`LLM_PROVIDER`): anthropic / openai-compatible / other
+        - Model (`ANTHROPIC_MODEL` or `OPENAI_MODEL`):
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Paste the relevant lines from `pnpm dev:scan`, browser console, or server logs. Redact secrets.
+      render: shell
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Workarounds you tried, hunches, related issues.

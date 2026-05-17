@@ -1,0 +1,46 @@
+name: CI or workflows
+description: Issues with GitHub Actions, pre-commit hooks, or other automation
+title: "ci: "
+labels: ["ci/cd"]
+body:
+  - type: input
+    id: workflow
+    attributes:
+      label: Workflow or hook affected
+      description: e.g. `.github/workflows/ci.yml`, the `lint-staged` pre-commit hook, the Gitleaks workflow.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected check or behavior
+      description: What should the workflow or hook do?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What is happening instead? Paste the failing run URL or relevant log lines.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproducer
+    attributes:
+      label: How to reproduce
+      description: Local command, branch, or PR that demonstrates the issue.
+
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: Willing to send a PR
+      options:
+        - "Yes"
+        - Yes, with guidance
+        - "No, just flagging"
+    validations:
+      required: true
