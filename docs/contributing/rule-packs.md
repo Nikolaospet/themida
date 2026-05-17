@@ -1,53 +1,58 @@
-# Adding a rule pack
+# Adding a single rule
 
-Rule packs are plain TypeScript: one module per framework, no plugin API.
+For a whole new framework (5+ rules), see
+[`framework-packs.md`](./framework-packs.md). This page covers adding **one
+rule to an existing framework**.
 
 ## Steps
 
-1. Add `src/lib/rules/<framework>.ts` with at least five rules.
-2. Register the framework in [`src/lib/rules/index.ts`](../../src/lib/rules/index.ts).
-3. Extend `Framework` in [`src/lib/rules/types.ts`](../../src/lib/rules/types.ts) if needed.
-4. Add an eval fixture under `evals/repos/<id>-<framework>/`.
-5. Run `pnpm evals:run` and confirm the file filter surfaces expected paths.
-6. Open a PR with legal sources cited (regulation article, OWASP entry, NIST control, etc.).
+1. Pick the framework directory under `src/lib/rules/frameworks/<id>/`.
+2. Create `rules/<PREFIX>-<NNN>.ts` (next free number) following the
+   [rule shape](#rule-shape).
+3. Register the rule in the framework's `index.ts` so it ends up in the
+   exported `<PREFIX>_RULES` array.
+4. Add an eval fixture under `evals/repos/<NNN>-<scenario>/` that
+   exercises the new rule.
+5. Run `pnpm typecheck && pnpm test && pnpm evals:run`.
+6. Open a PR with the legal source cited (regulation article, OWASP
+   entry, NIST control, etc.).
 
-Workflow and DCO: [CONTRIBUTING.md](../../CONTRIBUTING.md).
+Workflow and DCO: [`CONTRIBUTING.md`](../../CONTRIBUTING.md).
 
 ## Rule shape
 
 ```ts
-import type { ComplianceRule } from "./types";
+import type { ComplianceRule } from "../../../types";
 
-export const MY_FRAMEWORK_RULES: ComplianceRule[] = [
-  {
-    id: "MYF-001",
-    framework: "my-framework",
-    version: "1.0.0",
-    article: "My Framework §1.2.3",
-    legalText: "…",
-    legalSource: "https://…",
-    legalRisk: "…",
-    severity: "CRITICAL",
-    title: "Don't log raw passwords",
-    description: "Logging plaintext passwords on auth failure",
-    codePatterns: ["console.log(password)", "logger.info({ password })"],
-    keywords: ["password", "credential"],
-    fileTypes: [".ts", ".tsx", ".js"],
-    violationExamples: ["logger.info('failed: ' + password)"],
-    complianceExamples: ["logger.info('login failed for user')"],
-    findingTemplate: {
-      explanation: "…",
-      fixDescription: "…",
-      fixCodeTemplate: "…",
-      estimatedFixTime: "~30 minutes",
-      references: ["https://…"],
-    },
+export const MYF_001: ComplianceRule = {
+  id: "MYF-001",
+  framework: "my-framework", // must match meta.id of the parent pack
+  version: "1.0.0",
+  article: "My Framework §1.2.3",
+  legalText: "…",
+  legalSource: "https://…",
+  legalRisk: "Up to €X or Y% of turnover",
+  severity: "CRITICAL", // CRITICAL | HIGH | MEDIUM | LOW
+  title: "Don't log raw passwords",
+  description: "Logging plaintext passwords on auth failure",
+  codePatterns: ["console.log\\([^)]*password", "logger\\.(info|debug)\\([^)]*password"],
+  keywords: ["password", "credential"],
+  fileTypes: [".ts", ".tsx", ".js"],
+  violationExamples: ["logger.info('failed: ' + password)"],
+  complianceExamples: ["logger.info('login failed for user')"],
+  findingTemplate: {
+    explanation: "…",
+    fixDescription: "…",
+    fixCodeTemplate: "…",
+    estimatedFixTime: "~30 minutes",
+    references: ["https://…"],
   },
-];
+};
 ```
 
-Copy an existing rule from [`gdpr.ts`](../../src/lib/rules/gdpr.ts) for the full
-field set.
+Copy an existing rule from
+[`frameworks/gdpr/rules/GDPR-001.ts`](../../src/lib/rules/frameworks/gdpr/rules/GDPR-001.ts)
+for the full field set.
 
 ## Eval fixtures
 
@@ -61,8 +66,10 @@ evals/repos/002-md5-password-leftover/
 ```
 
 `manifest.json` lists `frameworks` and `expected_findings` (rule id + file path).
-See [`evals/manifest.schema.ts`](../../evals/manifest.schema.ts).
+See [`evals/manifest.schema.ts`](../../evals/manifest.schema.ts). The schema
+validates framework ids and rule-id prefixes against the registry, so a
+typo will fail the eval test rather than silently pass.
 
 ## Issue template
 
-Propose a single rule via the **Compliance rule pack** issue template on GitHub.
+Propose a single rule via the **Compliance rule** issue template on GitHub.

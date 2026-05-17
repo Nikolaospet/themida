@@ -1,10 +1,26 @@
 export type Severity = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
 export type Confidence = "HIGH" | "MEDIUM" | "LOW";
-export type Framework = "gdpr" | "eu-ai-act";
+
+/**
+ * Framework id at the type level. Runtime values are constrained by the
+ * `FRAMEWORK_REGISTRY` in `./frameworks/registry`. The narrowed literal
+ * union type (`"gdpr" | "eu-ai-act" | …`) is exported as `Framework`
+ * from `./index`.
+ */
+export type FrameworkId = string;
+
+export interface FrameworkMeta {
+  readonly id: FrameworkId;
+  readonly displayName: string;
+  readonly version: string;
+  readonly regulationUrl: string;
+  /** Prefix every rule id in this pack must start with (e.g. `GDPR`, `AI-ACT`). */
+  readonly ruleIdPrefix: string;
+}
 
 export interface ComplianceRule {
   readonly id: string;
-  readonly framework: Framework;
+  readonly framework: FrameworkId;
   readonly version: string;
 
   // Legal basis ----------------------------------------------------------
@@ -33,6 +49,11 @@ export interface ComplianceRule {
     estimatedFixTime: string;
     references: readonly string[];
   }>;
+}
+
+export interface FrameworkPack {
+  readonly meta: FrameworkMeta;
+  readonly rules: readonly ComplianceRule[];
 }
 
 export type ScanFile = {

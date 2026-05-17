@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 
-import { GDPR_001 } from "@/lib/rules/gdpr";
+import { GDPR_001 } from "@/lib/rules/frameworks/gdpr";
 
 import {
   buildDeepScanUserPrompt,

@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { GDPR_001 } from "@/lib/rules/gdpr";
+import { GDPR_001 } from "@/lib/rules/frameworks/gdpr";
 
 import type { RawFinding } from "./findings";
 import { runVerificationPass } from "./verify";
