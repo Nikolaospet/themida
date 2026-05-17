@@ -1,0 +1,7 @@
+{
+  "id": "gdpr",
+  "displayName": "GDPR",
+  "version": "1.0.0",
+  "regulationUrl": "https://gdpr-info.eu/",
+  "ruleIdPrefix": "GDPR"
+}

@@ -1,8 +1,7 @@
 // Server-only by transitive dependency on the OpenRouter client and
 // Supabase admin paths. Omitting the explicit `server-only` marker keeps
 // this module importable from CLI scripts (e.g. scripts/dev-scan.mts).
-import { getRulesForFrameworks, isFramework } from "@/lib/rules";
-import type { Framework } from "@/lib/rules/types";
+import { type Framework, getRulesForFrameworks, isFramework } from "@/lib/rules";
 
 import { chunkFiles } from "./chunker";
 import { runDeepScanPass } from "./deep";

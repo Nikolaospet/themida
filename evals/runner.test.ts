@@ -37,7 +37,11 @@ describe("eval runner", () => {
   it("each violation fixture references at least one rule id", async () => {
     const fixtures = await listFixtures();
     for (const fixture of fixtures) {
-      if (fixture === "001-clean-react-todo") continue;
+      // Baseline fixtures (`NNN-clean-*`) and framework-scaffold fixtures
+      // (`*-scaffold`, created by `pnpm framework:new --with-fixture`) are
+      // deliberately empty. Real violation fixtures must cite at least one
+      // rule id.
+      if (/^\d{3}-clean-/u.test(fixture) || fixture.endsWith("-scaffold")) continue;
       const { manifest } = await loadFixture(fixture);
       expect(manifest.expected_findings.length).toBeGreaterThan(0);
     }
