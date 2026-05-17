@@ -69,6 +69,22 @@ For non-trivial design choices, add an ADR under `docs/adr/`:
 cp docs/adr/0001-stack-and-foundations.md docs/adr/000X-<title>.md
 ```
 
+## Issue and PR labels
+
+The canonical label set lives in [`.github/labels.yml`](./.github/labels.yml).
+
+| Label              | Use for                                       |
+| ------------------ | --------------------------------------------- |
+| `bug`              | Incorrect behavior                            |
+| `enhancement`      | Product or scanner capability                 |
+| `framework`        | New or extended compliance framework          |
+| `rule-pack`        | Single rule or small pack change              |
+| `docs`             | Documentation only                            |
+| `ci/cd`            | Workflows, hooks, automation                  |
+| `testing`          | Tests, evals, fixtures                        |
+| `good first issue` | Low risk, documented steps                    |
+| `needs-triage`     | New issues awaiting review                    |
+
 ## Getting help
 
 Open a [GitHub Discussion](https://github.com/Nikolaospet/themida/discussions)
