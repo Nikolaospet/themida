@@ -1,6 +1,7 @@
 import type { FrameworkPack } from "../types";
 import { EU_AI_ACT_PACK } from "./eu-ai-act";
 import { GDPR_PACK } from "./gdpr";
+import { MICA_PACK } from "./mica";
 
 /**
  * Single source of truth for which framework packs ship in this build.
@@ -12,6 +13,7 @@ import { GDPR_PACK } from "./gdpr";
 export const FRAMEWORK_REGISTRY = {
   gdpr: GDPR_PACK,
   "eu-ai-act": EU_AI_ACT_PACK,
+  mica: MICA_PACK,
 } as const satisfies Record<string, FrameworkPack>;
 
 export type Framework = keyof typeof FRAMEWORK_REGISTRY;

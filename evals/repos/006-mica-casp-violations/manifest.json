@@ -1,0 +1,32 @@
+{
+  "name": "006-mica-casp-violations",
+  "description": "MiCA pilot fixture: a fictional crypto-asset service provider with marketing copy that promises yield without a risk disclaimer (MICA-001), a token metadata module that references a whitepaper URL without integrity hash (MICA-002), a withdraw endpoint that moves client assets without a segregation marker (MICA-003), a deposit endpoint that logs custody events via the standard logger only with no audit-log call (MICA-004), and an order-execution path that has no market-abuse detection hook (MICA-005).",
+  "frameworks": ["mica"],
+  "expected_findings": [
+    {
+      "rule_id": "MICA-001",
+      "file_path": "src/marketing/staking-page.tsx",
+      "line_number_approx": 10
+    },
+    {
+      "rule_id": "MICA-002",
+      "file_path": "src/tokens/metadata.ts",
+      "line_number_approx": 6
+    },
+    {
+      "rule_id": "MICA-003",
+      "file_path": "src/api/withdraw.ts",
+      "line_number_approx": 9
+    },
+    {
+      "rule_id": "MICA-004",
+      "file_path": "src/api/deposit.ts",
+      "line_number_approx": 11
+    },
+    {
+      "rule_id": "MICA-005",
+      "file_path": "src/exchange/execute.ts",
+      "line_number_approx": 11
+    }
+  ]
+}
