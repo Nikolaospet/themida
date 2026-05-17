@@ -111,6 +111,7 @@ pnpm build
 
 Full script reference: [`docs/development/scripts.md`](./docs/development/scripts.md).
 What CI runs and which checks block merges: [`docs/development/ci.md`](./docs/development/ci.md).
+How the test pyramid is structured: [`docs/contributing/testing.md`](./docs/contributing/testing.md).
 
 ## Contribution types
 
@@ -174,8 +175,8 @@ A PR is mergeable when its row's columns are all true.
 | ------------------ | ------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
 | Bug fix            | `typecheck`, `lint`, `test`                            | regression test that fails on `main`, passes on the branch                                    |
 | Scanner change     | `typecheck`, `lint`, `test`, `evals:run`               | unit test on the changed module; no regression in `evals:run`                                 |
-| Compliance rule    | `typecheck`, `test`, `evals:run`                       | unique rule `id`, `legalSource` link, fixture under `evals/repos/`                            |
-| Framework pack     | `typecheck`, `test`, `evals:run`                       | 5+ rules, registry entry, at least one fixture, row in `docs/reference/frameworks.md`         |
+| Compliance rule    | `typecheck`, `test`, `evals:run`                       | unique rule `id`, `legalSource` link, fixture under `evals/repos/` (or exemption in [`evals/rules-exempt.json`](./evals/rules-exempt.json)) |
+| Framework pack     | `typecheck`, `test`, `evals:run`                       | 5+ rules, registry entry, `pack.test.ts` passes, at least one fixture, row in `docs/reference/frameworks.md`     |
 | Docs-only          | `format:check`                                         | no dead links; no references to removed README anchors                                        |
 
 In all cases: DCO sign-off on every commit, Conventional Commits subject,
