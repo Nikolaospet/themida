@@ -1,0 +1,7 @@
+{
+  "id": "eu-ai-act",
+  "displayName": "EU AI Act",
+  "version": "1.0.0",
+  "regulationUrl": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+  "ruleIdPrefix": "AI-ACT"
+}
