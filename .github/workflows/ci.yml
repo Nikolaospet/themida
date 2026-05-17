@@ -41,11 +41,20 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Format check
+        run: pnpm format:check
+
       - name: Typecheck
         run: pnpm typecheck
 
       - name: Test
         run: pnpm test
+
+      - name: Evals
+        # Runs evals/runner.test.ts as its own step so the status is visible
+        # at a glance in CI logs even though `pnpm test` already includes it
+        # via the vitest `include` config.
+        run: pnpm evals:run
 
       - name: Build
         run: pnpm build
