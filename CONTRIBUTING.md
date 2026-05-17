@@ -90,8 +90,8 @@ using your `git config user.name` and `user.email`.
 ## Adding a new rule pack
 
 The highest-leverage contribution right now is a new compliance framework.
-See the [Adding a rule pack](./README.md#adding-a-rule-pack) section in the
-README for the file layout, then:
+See [Adding a rule pack](./docs/contributing/rule-packs.md) for the file layout,
+then:
 
 1. Add `src/lib/rules/<framework>.ts` with 5+ rules
 2. Register the framework in `src/lib/rules/index.ts`
@@ -99,6 +99,8 @@ README for the file layout, then:
 4. Run `pnpm evals:run` and confirm the file filter surfaces the right files
 5. Open a PR with the rule sources cited (regulation article, OWASP entry,
    NIST control, etc.)
+
+Documentation index: [docs/README.md](./docs/README.md).
 
 ## License of contributions
 
