@@ -69,6 +69,30 @@ For non-trivial design choices, add an ADR under `docs/adr/`:
 cp docs/adr/0001-stack-and-foundations.md docs/adr/000X-<title>.md
 ```
 
+## Opening an issue
+
+Each template under [`.github/ISSUE_TEMPLATE/`](./.github/ISSUE_TEMPLATE/) fits one kind of work. Pick the closest match — title prefixes and default labels are set for you.
+
+| Open this template     | When                                                              |
+| ---------------------- | ----------------------------------------------------------------- |
+| [Bug report]           | Themida behaves incorrectly and you can reproduce it              |
+| [Feature request]      | New capability that is not a single rule or framework             |
+| [Compliance rule]      | A single new rule (e.g. one GDPR article check)                   |
+| [Compliance framework] | A whole framework pack (5+ rules tied to one regulation)          |
+| [Documentation]        | Missing, wrong, or unclear documentation                          |
+| [CI or workflows]      | GitHub Actions, pre-commit hooks, or other automation issues      |
+
+Security vulnerabilities go through GitHub's private advisory flow, **not**
+the issue tracker — use the "Report a vulnerability" button under the
+Security tab.
+
+[Bug report]: ./.github/ISSUE_TEMPLATE/bug_report.yml
+[Feature request]: ./.github/ISSUE_TEMPLATE/feature_request.yml
+[Compliance rule]: ./.github/ISSUE_TEMPLATE/rule.yml
+[Compliance framework]: ./.github/ISSUE_TEMPLATE/framework.yml
+[Documentation]: ./.github/ISSUE_TEMPLATE/documentation.yml
+[CI or workflows]: ./.github/ISSUE_TEMPLATE/ci.yml
+
 ## Issue and PR labels
 
 The canonical label set lives in [`.github/labels.yml`](./.github/labels.yml).

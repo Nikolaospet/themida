@@ -1,0 +1,87 @@
+name: Compliance rule
+description: Propose a single rule (a whole framework belongs in the framework template)
+title: "rule: "
+labels: ["rule-pack"]
+body:
+  - type: input
+    id: framework
+    attributes:
+      label: Framework
+      description: e.g. GDPR, HIPAA, SOC 2, ISO 27001, OWASP Top 10, PCI DSS, EU AI Act
+    validations:
+      required: true
+
+  - type: textarea
+    id: reference
+    attributes:
+      label: Article or control reference
+      description: e.g. GDPR Art. 5(1)(f), HIPAA §164.312(a)(2)(iv), SOC 2 CC6.1. A link to the official text is gold.
+    validations:
+      required: true
+
+  - type: textarea
+    id: pattern
+    attributes:
+      label: Violation pattern this catches
+      description: 'Be specific: "weak crypto" is too broad; "MD5 used to hash a password" is good.'
+    validations:
+      required: true
+
+  - type: textarea
+    id: vulnerable
+    attributes:
+      label: Vulnerable code example
+      render: ts
+    validations:
+      required: true
+
+  - type: textarea
+    id: fix
+    attributes:
+      label: Compliant fix
+      render: ts
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - CRITICAL — regulatory breach, immediate fine exposure
+        - HIGH — clear non-compliance, fix soon
+        - MEDIUM — best practice violation, deserves a TODO
+        - LOW — documentation or hygiene
+    validations:
+      required: true
+
+  - type: textarea
+    id: false-positives
+    attributes:
+      label: False-positive risk
+      description: 'Where would this rule wrongly fire? e.g. "MD5 used in caching is fine — distinguish based on adjacent identifiers like `password`, `hash`, `pw`."'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: eval
+    attributes:
+      label: Eval fixtures
+      description: Eval fixtures live under `evals/repos/<slug>/` and measure detection accuracy.
+      options:
+        - Yes, included in this issue or a linked PR
+        - "No, but I can add some"
+        - Not sure how, would appreciate guidance
+    validations:
+      required: true
+
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: Willing to send a PR
+      options:
+        - "Yes"
+        - Yes, with guidance
+        - "No, just flagging"
+    validations:
+      required: true

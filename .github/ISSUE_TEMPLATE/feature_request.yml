@@ -1,0 +1,66 @@
+name: Feature request
+description: Suggest a new capability or improvement (not a single rule or framework)
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For a new compliance framework pack, use the **Compliance framework**
+        template. For a single rule, use the **Compliance rule** template.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem this solves
+      description: The motivation, not the solution. What is painful today? Who hits this, when, and how often?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Your idea for how to fix it. Rough is fine.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you thought about and why this one is better.
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      description: Which areas does this touch?
+      options:
+        - label: Scanner pipeline (recon / deep scan / verify)
+        - label: LLM provider adapter (Anthropic / OpenAI-compatible / other)
+        - label: UI or dashboard
+        - label: CLI or `pnpm dev:scan`
+        - label: Reporting (JSON, PDF, …)
+        - label: Self-host docs
+        - label: CI / workflows
+        - label: Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: Willing to send a PR
+      options:
+        - "Yes"
+        - Yes, with guidance
+        - "No, just flagging"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Links, screenshots, prior art, related issues.
