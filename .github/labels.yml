@@ -1,0 +1,42 @@
+# Canonical label set for the themida repository.
+#
+# Source of truth for issue and PR triage labels. Templates under
+# .github/ISSUE_TEMPLATE/ must only reference labels declared here.
+#
+# To sync manually: Settings -> Labels, or `gh label create <name> --color <hex> --description "<desc>"`.
+
+- name: bug
+  color: d73a4a
+  description: Incorrect behavior
+
+- name: enhancement
+  color: a2eeef
+  description: Product or scanner capability
+
+- name: framework
+  color: "0075ca"
+  description: New or extended compliance framework
+
+- name: rule-pack
+  color: 1d76db
+  description: Single rule or small pack change
+
+- name: docs
+  color: "0075ca"
+  description: Documentation only
+
+- name: ci/cd
+  color: fbca04
+  description: Workflows, hooks, automation
+
+- name: testing
+  color: 0e8a16
+  description: Tests, evals, fixtures
+
+- name: good first issue
+  color: 7057ff
+  description: Low risk, documented steps
+
+- name: needs-triage
+  color: ededed
+  description: New issues awaiting review
