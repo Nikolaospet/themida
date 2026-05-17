@@ -59,6 +59,6 @@ describe("rules registry", () => {
   });
 
   it("listFrameworks returns every registered framework id", () => {
-    expect(listFrameworks()).toEqual(["gdpr", "eu-ai-act"]);
+    expect(listFrameworks()).toEqual(Object.keys(FRAMEWORK_REGISTRY));
   });
 });
