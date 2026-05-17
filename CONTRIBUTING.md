@@ -110,6 +110,7 @@ pnpm build
 ```
 
 Full script reference: [`docs/development/scripts.md`](./docs/development/scripts.md).
+What CI runs and which checks block merges: [`docs/development/ci.md`](./docs/development/ci.md).
 
 ## Contribution types
 
