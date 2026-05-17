@@ -142,7 +142,7 @@ export default async function LandingPage() {
           {`git clone https://github.com/Nikolaospet/themida
 cd themida
 pnpm install
-# pick one provider (see README) — example uses Anthropic:
+# pick one provider (see docs/setup/configuration.md):
 export LLM_PROVIDER=anthropic
 export ANTHROPIC_API_KEY=sk-ant-…
 pnpm themida scan ./path/to/repo`}
@@ -154,6 +154,13 @@ pnpm themida scan ./path/to/repo`}
         </p>
 
         <p className="mt-2 font-mono text-xs text-neutral-500">
+          <Link
+            href={`${GITHUB_URL}/blob/main/docs/README.md`}
+            className="text-neutral-300 hover:text-neutral-100"
+          >
+            Docs
+          </Link>{" "}
+          ·{" "}
           <Link href={`${GITHUB_URL}#readme`} className="text-neutral-300 hover:text-neutral-100">
             README
           </Link>{" "}

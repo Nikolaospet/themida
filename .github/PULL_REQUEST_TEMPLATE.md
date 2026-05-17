@@ -27,7 +27,7 @@ Delete the sections that don't apply.
 - [ ] `pnpm lint` passes locally
 - [ ] `pnpm test` passes locally
 - [ ] Added/updated tests where it makes sense
-- [ ] Updated docs (`README.md`, code comments) if behaviour changed
+- [ ] Updated docs (`README.md`, `docs/`, code comments) if behaviour changed
 - [ ] My commits follow [Conventional Commits](https://www.conventionalcommits.org/)
       (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`)
 
