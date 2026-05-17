@@ -70,11 +70,17 @@ function usage(message?: string): never {
 }
 
 function writeFileSafe(filePath: string, content: string): void {
-  if (existsSync(filePath)) {
-    throw new Error(`refusing to overwrite existing file: ${path.relative(ROOT, filePath)}`);
-  }
   mkdirSync(path.dirname(filePath), { recursive: true });
-  writeFileSync(filePath, content);
+  try {
+    // `wx` is the atomic "create if absent" flag — no TOCTOU window
+    // between check-then-write that a plain existsSync() would leave.
+    writeFileSync(filePath, content, { flag: "wx" });
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "EEXIST") {
+      throw new Error(`refusing to overwrite existing file: ${path.relative(ROOT, filePath)}`);
+    }
+    throw err;
+  }
   console.log(`  created  ${path.relative(ROOT, filePath)}`);
 }
 
