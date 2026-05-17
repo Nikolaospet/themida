@@ -27,6 +27,7 @@
     "evals:run": "vitest run evals/runner.test.ts",
     "dev:fetch": "tsx scripts/dev-fetch-stats.mts",
     "dev:scan": "tsx scripts/dev-scan.mts",
+    "framework:new": "tsx scripts/framework-new.mts",
     "trigger:dev": "pnpm dlx trigger.dev@latest dev",
     "prepare": "husky"
   },

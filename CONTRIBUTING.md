@@ -44,7 +44,7 @@ themida/
 │   ├── app/                Next.js App Router routes (marketing, dashboard, api)
 │   ├── components/         dashboard + reports UI
 │   ├── lib/
-│   │   ├── rules/          compliance rule packs (gdpr.ts, eu-ai-act.ts, …)
+│   │   ├── rules/          compliance rule packs under rules/frameworks/<id>/
 │   │   ├── scanner/        fetch → filter → analyse → verify pipeline
 │   │   ├── llm/            provider-agnostic facade + adapters
 │   │   ├── github/         repo tree and blob fetcher
@@ -140,20 +140,21 @@ You are changing how the pipeline filters, chunks, calls the LLM, or verifies fi
 
 You are adding a single rule to an existing framework.
 
-- **Touch:** `src/lib/rules/<framework>.ts`, add a fixture under `evals/repos/`.
+- **Touch:** `src/lib/rules/frameworks/<id>/rules/<PREFIX>-<NNN>.ts`, register it in `frameworks/<id>/index.ts`, add a fixture under `evals/repos/`.
 - **Run:** `pnpm test`, `pnpm evals:run`.
 - **Reference:** field-by-field guide in [`docs/contributing/rule-packs.md`](./docs/contributing/rule-packs.md#rule-shape).
-- **Example:** add a rule that flags `console.log` of plaintext passwords under GDPR Art. 32. Append the rule to `src/lib/rules/gdpr.ts` with a unique `id` (e.g. `GDPR-014`), add a fixture in `evals/repos/014-gdpr-plaintext-password-log/`, then `pnpm evals:run`.
+- **Example:** add a rule that flags `console.log` of plaintext passwords under GDPR Art. 32. Create `src/lib/rules/frameworks/gdpr/rules/GDPR-006.ts` with a unique `id` (e.g. `GDPR-006`), append it to `GDPR_RULES` in `frameworks/gdpr/index.ts`, add a fixture in `evals/repos/006-gdpr-plaintext-password-log/`, then `pnpm evals:run`.
 - **Issue template:** "Compliance rule" with title prefix `rule:`.
 
 ### Compliance framework pack
 
 You are adding a whole new framework (5+ rules tied to one regulation).
 
-- **Touch:** `src/lib/rules/<framework>.ts` (new), `src/lib/rules/index.ts` (register), `src/lib/rules/types.ts` (extend `Framework`), at least one new fixture under `evals/repos/`, and add the framework to the table in [`docs/reference/frameworks.md`](./docs/reference/frameworks.md).
+- **Scaffold:** `pnpm framework:new <id> --name "Display Name" --regulation "https://…"` creates the pack directory, a starter rule, and registers it.
+- **Touch:** the scaffolded `src/lib/rules/frameworks/<id>/` (rules + `meta.json` + `index.ts`), at least one new fixture under `evals/repos/`, and add the framework to the table in [`docs/reference/frameworks.md`](./docs/reference/frameworks.md).
 - **Run:** `pnpm typecheck`, `pnpm test`, `pnpm evals:run`.
-- **Reference:** full walkthrough in [`docs/contributing/rule-packs.md`](./docs/contributing/rule-packs.md).
-- **Example:** MiCA pack — start with five high-impact articles, copy the shape from `gdpr.ts`, ship a fixture demonstrating one CRITICAL detection.
+- **Reference:** full walkthrough in [`docs/contributing/framework-packs.md`](./docs/contributing/framework-packs.md).
+- **Example:** MiCA pack — `pnpm framework:new mica --name "MiCA" --regulation "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R1114"`, then replace the placeholder rule with five high-impact articles and ship one violation fixture.
 - **Issue template:** "Compliance framework" with title prefix `framework:`.
 
 ### Docs-only change
