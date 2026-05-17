@@ -1,0 +1,76 @@
+name: Compliance framework
+description: Propose a whole framework pack (multiple rules) — for a single rule, use the rule template
+title: "framework: "
+labels: ["framework"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A framework pack is a coordinated set of rules tied to one regulation
+        or standard (e.g. MiCA, HIPAA, SOC 2). Single rules go in the rule
+        template.
+
+  - type: input
+    id: name
+    attributes:
+      label: Framework name
+      description: e.g. MiCA, HIPAA, SOC 2, ISO 27001
+    validations:
+      required: true
+
+  - type: input
+    id: regulation-url
+    attributes:
+      label: Regulation source URL
+      description: Link to the official text or the most authoritative summary.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and applicability
+      description: Who must comply? Which jurisdictions, sectors, or data types?
+    validations:
+      required: true
+
+  - type: input
+    id: rule-count
+    attributes:
+      label: Target rule count for the initial pack
+      description: Minimum 5 rules per pack. List the high-priority articles or controls.
+    validations:
+      required: true
+
+  - type: textarea
+    id: high-priority
+    attributes:
+      label: High-priority articles or controls
+      description: Bullet list of the articles or controls the initial rules will target.
+    validations:
+      required: true
+
+  - type: textarea
+    id: eval-plan
+    attributes:
+      label: Eval fixture plan
+      description: How will detection accuracy be validated? Which repos or synthetic fixtures will be added under `evals/repos/`?
+    validations:
+      required: true
+
+  - type: textarea
+    id: skillware
+    attributes:
+      label: Skillware or external reference (optional)
+      description: Existing scanners, lint rules, audit checklists, or papers we can draw from.
+
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: Willing to send a PR
+      options:
+        - "Yes, I will draft the pack"
+        - Yes, with guidance
+        - "No, just flagging"
+    validations:
+      required: true
