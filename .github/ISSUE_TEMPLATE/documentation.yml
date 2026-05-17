@@ -1,0 +1,53 @@
+name: Documentation
+description: Missing, wrong, or unclear documentation
+title: "docs: "
+labels: ["docs"]
+body:
+  - type: input
+    id: which-doc
+    attributes:
+      label: Which document
+      description: File path or URL (e.g. `docs/setup/local.md`, `README.md#adding-a-rule-pack`).
+    validations:
+      required: true
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Audience
+      options:
+        - First-time contributor
+        - Self-host operator
+        - Rule pack author
+        - End user reading scan output
+        - Maintainer
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong or missing
+      description: What did you try to do, and what did the docs fail to tell you?
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: What would "done" look like? List the concrete things a reader should be able to do after the change.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: Willing to send a PR
+      options:
+        - "Yes"
+        - Yes, with guidance
+        - "No, just flagging"
+    validations:
+      required: true
