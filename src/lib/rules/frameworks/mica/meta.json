@@ -1,0 +1,7 @@
+{
+  "id": "mica",
+  "displayName": "MiCA",
+  "version": "1.0.0",
+  "regulationUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R1114",
+  "ruleIdPrefix": "MICA"
+}
