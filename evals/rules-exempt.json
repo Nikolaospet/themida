@@ -1,0 +1,34 @@
+{
+  "$schema": "./rules-exempt.schema.json",
+  "_doc": [
+    "Rules listed here are temporarily allowed to ship without a violation",
+    "fixture under evals/repos/. Each entry must include a non-empty `reason`.",
+    "When the rule gets a fixture, remove its entry from this file.",
+    "",
+    "The eval runner test (evals/runner.test.ts) treats an empty or removed",
+    "exemption as 'fixture required' — adding a new rule without coverage and",
+    "without an entry here will fail CI."
+  ],
+  "exempt": [
+    {
+      "rule_id": "GDPR-004",
+      "reason": "Pre-checked consent checkbox; needs an HTML/JSX fixture covering the form-element pattern."
+    },
+    {
+      "rule_id": "GDPR-005",
+      "reason": "Non-EU analytics endpoints; needs a multi-file fixture exercising client and server send paths."
+    },
+    {
+      "rule_id": "AI-ACT-003",
+      "reason": "GPAI without model card; needs a fixture combining LLM client code with a missing docs/MODEL_CARD.md."
+    },
+    {
+      "rule_id": "AI-ACT-004",
+      "reason": "Biometric identification; needs a fixture with rekognition / face-api calls lacking a lawful-basis gate."
+    },
+    {
+      "rule_id": "AI-ACT-005",
+      "reason": "Workplace/education emotion recognition; needs a fixture combining detectEmotion with HR/student context."
+    }
+  ]
+}

@@ -31,6 +31,13 @@ Delete the sections that don't apply.
 - [ ] My commits follow [Conventional Commits](https://www.conventionalcommits.org/)
       (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`)
 
+### If this PR touches `src/lib/rules/**`
+
+- [ ] Every new rule id is covered by a fixture under `evals/repos/<NNN>-<slug>/`
+      **or** listed in [`evals/rules-exempt.json`](../evals/rules-exempt.json) with a `reason`
+- [ ] `pnpm evals:run` passes locally
+- [ ] Each new rule cites a real `legalSource` URL
+
 ## Notes for the reviewer
 
 <!-- Anything reviewer-specific: tradeoffs, follow-ups, things you tried
