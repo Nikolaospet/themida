@@ -1,0 +1,7 @@
+{
+  "id": "owasp",
+  "displayName": "OWASP Top 10",
+  "version": "1.0.0",
+  "regulationUrl": "https://owasp.org/Top10/",
+  "ruleIdPrefix": "OWASP"
+}
