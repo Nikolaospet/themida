@@ -54,7 +54,7 @@ describe("rules registry", () => {
   it("isFramework narrows valid strings", () => {
     expect(isFramework("gdpr")).toBe(true);
     expect(isFramework("eu-ai-act")).toBe(true);
-    expect(isFramework("hipaa")).toBe(false);
+    expect(isFramework("not-a-real-framework")).toBe(false);
     expect(isFramework("")).toBe(false);
   });
 

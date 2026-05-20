@@ -1,0 +1,7 @@
+{
+  "id": "hipaa",
+  "displayName": "HIPAA",
+  "version": "1.0.0",
+  "regulationUrl": "https://www.ecfr.gov/current/title-45/subtitle-A/subchapter-C/part-164",
+  "ruleIdPrefix": "HIPAA"
+}
