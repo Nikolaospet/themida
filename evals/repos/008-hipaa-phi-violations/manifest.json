@@ -1,0 +1,32 @@
+{
+  "name": "008-hipaa-phi-violations",
+  "description": "HIPAA pilot fixture: a small patient-records service with one violation per shipped rule — a patient store that persists SSN and diagnosis as plaintext columns (HIPAA-001, §164.312(a)(2)(iv)), an EHR sync that POSTs PHI to an http:// endpoint (HIPAA-002, §164.312(e)), a patient endpoint that returns the full record with no access check or minimum-necessary projection (HIPAA-003, §164.312(a)(1)/§164.502(b)), a records endpoint that reads PHI with only a console.log and no audit-trail entry (HIPAA-004, §164.312(b)), and a PHI access guard that rejects denied access with 403 without recording the failed attempt (HIPAA-005, §164.308(a)(1)(ii)(D)).",
+  "frameworks": ["hipaa"],
+  "expected_findings": [
+    {
+      "rule_id": "HIPAA-001",
+      "file_path": "src/lib/db/patient-store.ts",
+      "line_number_approx": 10
+    },
+    {
+      "rule_id": "HIPAA-002",
+      "file_path": "src/api/patients/sync.ts",
+      "line_number_approx": 5
+    },
+    {
+      "rule_id": "HIPAA-003",
+      "file_path": "src/api/patients/route.ts",
+      "line_number_approx": 13
+    },
+    {
+      "rule_id": "HIPAA-004",
+      "file_path": "src/api/records/route.ts",
+      "line_number_approx": 9
+    },
+    {
+      "rule_id": "HIPAA-005",
+      "file_path": "src/lib/auth/phi-access.ts",
+      "line_number_approx": 8
+    }
+  ]
+}

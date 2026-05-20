@@ -10,7 +10,7 @@ source of truth for which packs ship is
 | GDPR (EU 2016/679) | Shipped  | 5 (`GDPR-001`–`GDPR-005`)      | [`src/lib/rules/frameworks/gdpr/`](../../src/lib/rules/frameworks/gdpr/)                          |
 | EU AI Act          | Shipped  | 5 (`AI-ACT-001`–`AI-ACT-005`)  | [`src/lib/rules/frameworks/eu-ai-act/`](../../src/lib/rules/frameworks/eu-ai-act/)                |
 | MiCA (EU 2023/1114) | Shipped  | 5 (`MICA-001`–`MICA-005`)      | [`src/lib/rules/frameworks/mica/`](../../src/lib/rules/frameworks/mica/)                           |
-| HIPAA              | Planned  | —                              | Contributions welcome                                                                              |
+| HIPAA              | Shipped  | 5 (`HIPAA-001`–`HIPAA-005`)    | [`src/lib/rules/frameworks/hipaa/`](../../src/lib/rules/frameworks/hipaa/)                        |
 | SOC 2              | Planned  | —                              | Contributions welcome                                                                              |
 | ISO 27001          | Planned  | —                              | Contributions welcome                                                                              |
 | OWASP Top 10       | Planned  | —                              | Contributions welcome                                                                              |
