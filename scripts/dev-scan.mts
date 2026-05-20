@@ -1,10 +1,21 @@
 /* eslint-disable no-console */
+import { parseArgs } from "node:util";
+
 import { fetchRepoFiles } from "@/lib/github/fetcher";
+import { listFrameworks } from "@/lib/rules";
+import { parseFrameworksArg } from "@/lib/rules/parse-frameworks";
 import { runComplianceScan } from "@/lib/scanner";
 import { filterRepoFiles } from "@/lib/scanner/filter";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 async function main(): Promise<void> {
+  const { values } = parseArgs({
+    options: { frameworks: { type: "string" } },
+  });
+  // No flag → scan every registered pack. `--frameworks gdpr,mica` restricts
+  // to a validated subset (parseFrameworksArg throws on unknown ids).
+  const frameworks = values.frameworks ? parseFrameworksArg(values.frameworks) : listFrameworks();
+
   const admin = createSupabaseAdminClient();
 
   const { data: repo, error } = await admin
@@ -20,7 +31,9 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  console.log(`Scanning ${repo.full_name} (installation ${repo.installation_id})...\n`);
+  console.log(
+    `Scanning ${repo.full_name} (installation ${repo.installation_id}) — frameworks: ${frameworks.join(", ")}...\n`,
+  );
 
   const fetched = await fetchRepoFiles(repo.installation_id, repo.owner, repo.name, {
     cacheRepoId: repo.id,
@@ -32,7 +45,7 @@ async function main(): Promise<void> {
   const startedAt = Date.now();
   const result = await runComplianceScan({
     files: filtered,
-    frameworks: ["gdpr", "eu-ai-act"],
+    frameworks,
   });
   const duration = Date.now() - startedAt;
 
@@ -58,7 +71,9 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((err) => {
-  console.error(err);
+main().catch((err: unknown) => {
+  // Print the message cleanly (e.g. the --frameworks validation hint) rather
+  // than dumping a stack trace for what is usually a user-input mistake.
+  console.error(err instanceof Error ? err.message : err);
   process.exit(1);
 });
