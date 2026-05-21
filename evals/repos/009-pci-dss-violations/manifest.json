@@ -1,0 +1,32 @@
+{
+  "name": "009-pci-dss-violations",
+  "description": "PCI DSS pilot fixture: a small card-payments service with one violation per shipped rule — a card store that persists the full PAN as a plaintext column (PCI-001, Req 3.5.1), a charge path that POSTs the PAN to an http:// gateway (PCI-002, Req 4.2.1), an encrypt helper with a hardcoded AES key (PCI-003, Req 3.6/3.7), a card endpoint that reads cardholder data with only a console.log and no audit-trail entry (PCI-004, Req 10.2.1), and a payments DB pool that connects with the admin/admin vendor default credentials (PCI-005, Req 2.2.2/8.3.1).",
+  "frameworks": ["pci-dss"],
+  "expected_findings": [
+    {
+      "rule_id": "PCI-001",
+      "file_path": "src/lib/db/card-store.ts",
+      "line_number_approx": 8
+    },
+    {
+      "rule_id": "PCI-002",
+      "file_path": "src/api/payments/charge.ts",
+      "line_number_approx": 5
+    },
+    {
+      "rule_id": "PCI-003",
+      "file_path": "src/lib/crypto/encrypt.ts",
+      "line_number_approx": 8
+    },
+    {
+      "rule_id": "PCI-004",
+      "file_path": "src/api/cards/route.ts",
+      "line_number_approx": 8
+    },
+    {
+      "rule_id": "PCI-005",
+      "file_path": "src/lib/db/pool.ts",
+      "line_number_approx": 9
+    }
+  ]
+}

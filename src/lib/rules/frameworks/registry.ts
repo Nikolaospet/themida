@@ -4,6 +4,7 @@ import { GDPR_PACK } from "./gdpr";
 import { HIPAA_PACK } from "./hipaa";
 import { MICA_PACK } from "./mica";
 import { OWASP_PACK } from "./owasp";
+import { PCI_DSS_PACK } from "./pci-dss";
 
 /**
  * Single source of truth for which framework packs ship in this build.
@@ -18,6 +19,7 @@ export const FRAMEWORK_REGISTRY = {
   mica: MICA_PACK,
   hipaa: HIPAA_PACK,
   owasp: OWASP_PACK,
+  "pci-dss": PCI_DSS_PACK,
 } as const satisfies Record<string, FrameworkPack>;
 
 export type Framework = keyof typeof FRAMEWORK_REGISTRY;
