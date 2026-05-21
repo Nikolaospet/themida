@@ -1,0 +1,32 @@
+{
+  "name": "007-owasp-top10-violations",
+  "description": "OWASP Top 10 pilot fixture: a small web service with one violation per shipped rule — an order endpoint that returns a record by request id with no ownership check (OWASP-001, A01), a crypto helper using Math.random() for a reset token and MD5 for hashing (OWASP-002, A02), a search endpoint that concatenates the query string into SQL (OWASP-003, A03), an HTTP client config that disables TLS verification and wildcards CORS with credentials (OWASP-004, A05), and a login route comparing plaintext passwords, signing a 'none'-algorithm JWT, and setting a non-httpOnly session cookie (OWASP-005, A07).",
+  "frameworks": ["owasp"],
+  "expected_findings": [
+    {
+      "rule_id": "OWASP-001",
+      "file_path": "src/api/orders/route.ts",
+      "line_number_approx": 12
+    },
+    {
+      "rule_id": "OWASP-002",
+      "file_path": "src/lib/auth/crypto.ts",
+      "line_number_approx": 7
+    },
+    {
+      "rule_id": "OWASP-003",
+      "file_path": "src/api/search/route.ts",
+      "line_number_approx": 10
+    },
+    {
+      "rule_id": "OWASP-004",
+      "file_path": "src/config/http-client.ts",
+      "line_number_approx": 9
+    },
+    {
+      "rule_id": "OWASP-005",
+      "file_path": "src/api/auth/login/route.ts",
+      "line_number_approx": 18
+    }
+  ]
+}

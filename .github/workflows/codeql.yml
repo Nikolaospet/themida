@@ -38,6 +38,12 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
+          # Eval fixtures under evals/repos/** contain deliberately vulnerable
+          # code that the framework rule packs exist to detect. Excluding them
+          # keeps intentional test data from raising real CodeQL alerts.
+          config: |
+            paths-ignore:
+              - evals/repos/**
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
