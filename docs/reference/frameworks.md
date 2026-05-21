@@ -13,7 +13,7 @@ source of truth for which packs ship is
 | HIPAA              | Shipped  | 5 (`HIPAA-001`–`HIPAA-005`)    | [`src/lib/rules/frameworks/hipaa/`](../../src/lib/rules/frameworks/hipaa/)                        |
 | SOC 2              | Planned  | —                              | Contributions welcome                                                                              |
 | ISO 27001          | Planned  | —                              | Contributions welcome                                                                              |
-| OWASP Top 10       | Planned  | —                              | Contributions welcome                                                                              |
+| OWASP Top 10       | Shipped  | 5 (`OWASP-001`–`OWASP-005`)    | [`src/lib/rules/frameworks/owasp/`](../../src/lib/rules/frameworks/owasp/)                        |
 | PCI DSS            | Planned  | —                              | Contributions welcome                                                                              |
 
 To add a whole framework, follow
