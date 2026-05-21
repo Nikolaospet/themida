@@ -66,3 +66,52 @@ Repeat steps 1–3 with a separate App named `Themida (Production)` and
 the production callback URL (e.g.
 `https://themida.io/api/github/setup/callback`). Do **not** copy the
 local App's credentials to production.
+
+## 6. Upload findings to GitHub Code Scanning (SARIF)
+
+Themida can emit findings as [SARIF 2.1.0](https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html),
+so they render as line-level annotations in the **Security** tab and on
+pull requests. Generate the file with the `--format sarif` flag:
+
+```bash
+pnpm dev:scan --format sarif --out themida.sarif
+# optionally restrict packs: --frameworks gdpr,pci-dss
+```
+
+Then upload it from a workflow with `github/codeql-action/upload-sarif`:
+
+```yaml
+# .github/workflows/themida.yml
+name: Themida compliance scan
+on: [pull_request]
+
+permissions:
+  contents: read
+  security-events: write # required to upload SARIF
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm dev:scan --format sarif --out themida.sarif
+        env:
+          # provide the scanner's GitHub App + LLM credentials as secrets
+          GITHUB_APP_ID: ${{ secrets.THEMIDA_APP_ID }}
+          GITHUB_APP_PRIVATE_KEY: ${{ secrets.THEMIDA_APP_PRIVATE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: themida.sarif
+```
+
+Severity maps to SARIF levels (`CRITICAL`/`HIGH` → `error`, `MEDIUM` →
+`warning`, `LOW` → `note`), and each rule carries a `security-severity`
+score plus a `helpUri` pointing at the legal source, so Code Scanning
+ranks and links findings correctly.

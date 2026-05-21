@@ -1,17 +1,30 @@
 /* eslint-disable no-console */
+import { writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 
 import { fetchRepoFiles } from "@/lib/github/fetcher";
 import { listFrameworks } from "@/lib/rules";
 import { parseFrameworksArg } from "@/lib/rules/parse-frameworks";
 import { runComplianceScan } from "@/lib/scanner";
+import { toSarifString } from "@/lib/scanner/exporters/sarif";
 import { filterRepoFiles } from "@/lib/scanner/filter";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 async function main(): Promise<void> {
   const { values } = parseArgs({
-    options: { frameworks: { type: "string" } },
+    options: {
+      frameworks: { type: "string" },
+      format: { type: "string" },
+      out: { type: "string" },
+    },
   });
+  const format = values.format ?? "text";
+  if (format !== "text" && format !== "sarif") {
+    throw new Error(`unknown --format '${format}': expected 'text' or 'sarif'`);
+  }
+  if (format === "sarif" && !values.out) {
+    throw new Error("--format sarif requires --out <file> (e.g. --out themida.sarif)");
+  }
   // No flag → scan every registered pack. `--frameworks gdpr,mica` restricts
   // to a validated subset (parseFrameworksArg throws on unknown ids).
   const frameworks = values.frameworks ? parseFrameworksArg(values.frameworks) : listFrameworks();
@@ -57,6 +70,16 @@ async function main(): Promise<void> {
   console.log(`  Findings (kept):  ${result.stats.findingsVerified}`);
   console.log(`  Compliance score: ${result.score}`);
   console.log(`  Wall-clock:       ${duration} ms\n`);
+
+  if (format === "sarif") {
+    const out = values.out!;
+    // Path is an explicit operator-supplied CLI argument, not untrusted input.
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    writeFileSync(out, toSarifString(result.findings));
+    console.log(`Wrote ${result.findings.length} finding(s) to ${out} (SARIF 2.1.0).`);
+    console.log("Upload in CI with github/codeql-action/upload-sarif.");
+    return;
+  }
 
   if (result.findings.length === 0) {
     console.log("No verified violations.");
