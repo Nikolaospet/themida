@@ -14,7 +14,7 @@ source of truth for which packs ship is
 | SOC 2              | Planned  | —                              | Contributions welcome                                                                              |
 | ISO 27001          | Planned  | —                              | Contributions welcome                                                                              |
 | OWASP Top 10       | Shipped  | 5 (`OWASP-001`–`OWASP-005`)    | [`src/lib/rules/frameworks/owasp/`](../../src/lib/rules/frameworks/owasp/)                        |
-| PCI DSS            | Planned  | —                              | Contributions welcome                                                                              |
+| PCI DSS v4.0       | Shipped  | 5 (`PCI-001`–`PCI-005`)        | [`src/lib/rules/frameworks/pci-dss/`](../../src/lib/rules/frameworks/pci-dss/)                    |
 
 To add a whole framework, follow
 [Framework packs](../contributing/framework-packs.md). For a single rule
