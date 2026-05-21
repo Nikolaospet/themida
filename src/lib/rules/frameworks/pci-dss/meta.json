@@ -1,0 +1,7 @@
+{
+  "id": "pci-dss",
+  "displayName": "PCI DSS",
+  "version": "1.0.0",
+  "regulationUrl": "https://www.pcisecuritystandards.org/document_library/",
+  "ruleIdPrefix": "PCI"
+}
