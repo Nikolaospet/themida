@@ -1,11 +1,13 @@
 // Server-only by transitive dependency on the OpenRouter client and
 // Supabase admin paths. Omitting the explicit `server-only` marker keeps
 // this module importable from CLI scripts (e.g. scripts/dev-scan.mts).
+import { childLogger } from "@/lib/logger";
 import { type Framework, getRulesForFrameworks, isFramework } from "@/lib/rules";
 
 import { chunkFiles } from "./chunker";
 import { runDeepScanPass } from "./deep";
 import type { ScanResult } from "./findings";
+import { dropGeneratedPathFindings } from "./generated-paths";
 import type { ScanPhase } from "./progress";
 import { runReconPass } from "./recon";
 import { calculateComplianceScore } from "./score";
@@ -13,6 +15,8 @@ import type { ScannerFile } from "./types";
 import { runVerificationPass } from "./verify";
 
 const DEEP_CHUNK_TOKENS = 20_000;
+
+const log = childLogger({ component: "scanner" });
 
 export type OrchestratorPhase = Extract<ScanPhase, "recon" | "deep_scan" | "verifying" | "done">;
 
@@ -41,6 +45,7 @@ export async function runComplianceScan(input: RunComplianceScanInput): Promise<
         filesScanned: 0,
         chunks: 0,
         findingsRaw: 0,
+        findingsDroppedGenerated: 0,
         findingsVerified: 0,
         durationMs: Date.now() - startedAt,
       },
@@ -62,6 +67,7 @@ export async function runComplianceScan(input: RunComplianceScanInput): Promise<
         filesScanned: 0,
         chunks: 0,
         findingsRaw: 0,
+        findingsDroppedGenerated: 0,
         findingsVerified: 0,
         durationMs: Date.now() - startedAt,
       },
@@ -84,9 +90,17 @@ export async function runComplianceScan(input: RunComplianceScanInput): Promise<
     onChunkComplete: (done, total) => input.onPhase?.("deep_scan", done, total),
   });
 
+  // Drop findings in generated / vendored / built paths before they ever
+  // reach the report — they are noise users cannot act on, and skipping them
+  // here also keeps them out of the (token-billed) verification prompt.
+  const { kept, dropped } = dropGeneratedPathFindings(raw);
+  if (dropped.length > 0) {
+    log.info({ dropped: dropped.length }, `dropped ${dropped.length} findings in generated paths`);
+  }
+
   // Pass 4: verification.
   input.onPhase?.("verifying");
-  const verified = await runVerificationPass(raw, rules, llmContext);
+  const verified = await runVerificationPass(kept, rules, llmContext);
 
   input.onPhase?.("done");
   return {
@@ -96,6 +110,7 @@ export async function runComplianceScan(input: RunComplianceScanInput): Promise<
       filesScanned: selected.length,
       chunks: chunks.length,
       findingsRaw: raw.length,
+      findingsDroppedGenerated: dropped.length,
       findingsVerified: verified.length,
       durationMs: Date.now() - startedAt,
     },

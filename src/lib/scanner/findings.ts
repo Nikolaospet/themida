@@ -61,6 +61,7 @@ export type ScanStats = {
   readonly filesScanned: number;
   readonly chunks: number;
   readonly findingsRaw: number;
+  readonly findingsDroppedGenerated: number;
   readonly findingsVerified: number;
   readonly durationMs: number;
 };

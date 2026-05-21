@@ -1,6 +1,7 @@
 import type { FrameworkPack } from "../types";
 import { EU_AI_ACT_PACK } from "./eu-ai-act";
 import { GDPR_PACK } from "./gdpr";
+import { HIPAA_PACK } from "./hipaa";
 import { MICA_PACK } from "./mica";
 import { OWASP_PACK } from "./owasp";
 
@@ -15,6 +16,7 @@ export const FRAMEWORK_REGISTRY = {
   gdpr: GDPR_PACK,
   "eu-ai-act": EU_AI_ACT_PACK,
   mica: MICA_PACK,
+  hipaa: HIPAA_PACK,
   owasp: OWASP_PACK,
 } as const satisfies Record<string, FrameworkPack>;
 
