@@ -17,9 +17,24 @@ Run from the repository root.
 | `pnpm db:types` | Regenerate `src/types/database.ts` |
 | `pnpm dev:fetch` | Inspect file fetcher for the latest repo |
 | `pnpm dev:scan` | Run full scan pipeline for the latest repo |
+| `pnpm dev:scan --frameworks gdpr,mica` | Restrict the scan to selected framework packs |
 | `pnpm evals:run` | Accuracy evals under `evals/repos/` |
 | `pnpm trigger:dev` | Trigger.dev local worker |
 | `pnpm secretlint` | Scan working tree for committed secrets |
+
+## Selecting frameworks for `dev:scan`
+
+By default `pnpm dev:scan` runs every registered framework pack. Pass
+`--frameworks` with a comma-separated, case-insensitive list to restrict the
+scan to a subset:
+
+```bash
+pnpm dev:scan --frameworks gdpr          # GDPR only
+pnpm dev:scan --frameworks gdpr,mica     # GDPR + MiCA
+```
+
+Unknown ids fail fast and exit non-zero with the list of valid ids. Valid ids
+come from [`src/lib/rules/frameworks/registry.ts`](../../src/lib/rules/frameworks/registry.ts).
 
 ## Before a pull request
 

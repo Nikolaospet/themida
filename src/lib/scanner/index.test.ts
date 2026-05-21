@@ -111,6 +111,25 @@ describe("runComplianceScan", () => {
     expect(callLlmMock).toHaveBeenCalledTimes(3);
   });
 
+  it("drops findings in generated paths before verification and reports the count", async () => {
+    callLlmMock
+      .mockResolvedValueOnce(reconResp(["src/auth.ts"]))
+      .mockResolvedValueOnce(deepResp(["src/auth.ts", "dist/auth.js"]))
+      .mockResolvedValueOnce(verifyResp(["src/auth.ts"]));
+
+    const result = await runComplianceScan({
+      files: [{ path: "src/auth.ts", size: md5File.length, content: md5File }],
+      frameworks: ["gdpr"],
+    });
+
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings.map((f) => f.file_path)).toEqual(["src/auth.ts"]);
+    expect(result.findings.some((f) => f.file_path.startsWith("dist/"))).toBe(false);
+    expect(result.stats.findingsRaw).toBe(2);
+    expect(result.stats.findingsDroppedGenerated).toBe(1);
+    expect(result.stats.findingsVerified).toBe(1);
+  });
+
   it("short-circuits when filtering yields zero files", async () => {
     const result = await runComplianceScan({ files: [], frameworks: ["gdpr"] });
     expect(result.findings).toEqual([]);
