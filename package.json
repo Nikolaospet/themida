@@ -28,6 +28,8 @@
     "dev:fetch": "tsx scripts/dev-fetch-stats.mts",
     "dev:scan": "tsx scripts/dev-scan.mts",
     "framework:new": "tsx scripts/framework-new.mts",
+    "docs:generate": "tsx scripts/generate-frameworks-doc.mts",
+    "docs:check": "tsx scripts/generate-frameworks-doc.mts --check",
     "trigger:dev": "pnpm dlx trigger.dev@latest dev",
     "prepare": "husky"
   },
