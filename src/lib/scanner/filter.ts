@@ -132,6 +132,12 @@ function contentScore(content: string | undefined): number {
 
 export type FilterOptions = {
   maxFiles?: number;
+  /**
+   * Diff mode: when set, only files whose path is in this set are considered
+   * (the usual ignore/extension/score rules still apply within that set).
+   * Used by `--diff`/`--github-pr` to scan only the files a PR touched.
+   */
+  diffPaths?: ReadonlySet<string>;
 };
 
 export function filterRepoFiles(
@@ -139,9 +145,11 @@ export function filterRepoFiles(
   options: FilterOptions = {},
 ): FilteredFile[] {
   const maxFiles = options.maxFiles ?? Number.POSITIVE_INFINITY;
+  const { diffPaths } = options;
 
   const scored: FilteredFile[] = [];
   for (const file of files) {
+    if (diffPaths && !diffPaths.has(file.path)) continue;
     if (IGNORE_PATH_PATTERNS.some((p) => p.test(file.path))) continue;
     if (!ALLOWED_EXTENSIONS.has(extension(file.path))) continue;
 

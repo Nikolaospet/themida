@@ -3,9 +3,11 @@ import { writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 
 import { fetchRepoFiles } from "@/lib/github/fetcher";
+import { getPullRequestFilePaths } from "@/lib/github/pr-files";
 import { listFrameworks } from "@/lib/rules";
 import { parseFrameworksArg } from "@/lib/rules/parse-frameworks";
 import { runComplianceScan } from "@/lib/scanner";
+import { localDiffPaths } from "@/lib/scanner/diff";
 import { toSarifString } from "@/lib/scanner/exporters/sarif";
 import { filterRepoFiles } from "@/lib/scanner/filter";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -16,6 +18,8 @@ async function main(): Promise<void> {
       frameworks: { type: "string" },
       format: { type: "string" },
       out: { type: "string" },
+      diff: { type: "string" },
+      "github-pr": { type: "string" },
     },
   });
   const format = values.format ?? "text";
@@ -24,6 +28,13 @@ async function main(): Promise<void> {
   }
   if (format === "sarif" && !values.out) {
     throw new Error("--format sarif requires --out <file> (e.g. --out themida.sarif)");
+  }
+  if (values.diff && values["github-pr"]) {
+    throw new Error("pass either --diff <base..head> or --github-pr <number>, not both");
+  }
+  const prNumber = values["github-pr"] ? Number(values["github-pr"]) : undefined;
+  if (prNumber !== undefined && !Number.isInteger(prNumber)) {
+    throw new Error(`--github-pr expects an integer, got '${values["github-pr"]}'`);
   }
   // No flag → scan every registered pack. `--frameworks gdpr,mica` restricts
   // to a validated subset (parseFrameworksArg throws on unknown ids).
@@ -44,15 +55,45 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
+  // Diff mode: restrict the scan to files a PR/branch touched. `--diff` reads a
+  // local git range; `--github-pr` reads the PR's changed files from the API.
+  let diffPaths: Set<string> | undefined;
+  if (values.diff) {
+    diffPaths = localDiffPaths(values.diff);
+  } else if (prNumber !== undefined) {
+    diffPaths = await getPullRequestFilePaths(
+      repo.installation_id,
+      repo.owner,
+      repo.name,
+      prNumber,
+    );
+  }
+
+  const scope = values.diff
+    ? `diff ${values.diff}`
+    : prNumber !== undefined
+      ? `PR #${prNumber}`
+      : "full repo";
   console.log(
-    `Scanning ${repo.full_name} (installation ${repo.installation_id}) — frameworks: ${frameworks.join(", ")}...\n`,
+    `Scanning ${repo.full_name} (installation ${repo.installation_id}) — ${scope} — frameworks: ${frameworks.join(", ")}...`,
   );
+  if (diffPaths) console.log(`Diff scope: ${diffPaths.size} changed file(s).`);
+  console.log();
+
+  if (diffPaths && diffPaths.size === 0) {
+    console.log("No changed files in the diff; nothing to scan.");
+    return;
+  }
 
   const fetched = await fetchRepoFiles(repo.installation_id, repo.owner, repo.name, {
     cacheRepoId: repo.id,
+    // Only download the changed blobs when in diff mode (the real token/bandwidth win).
+    ...(diffPaths ? { paths: [...diffPaths] } : {}),
   });
   const filtered = filterRepoFiles(
     fetched.files.map((f) => ({ path: f.path, size: f.size, content: f.content })),
+    // The filter also enforces the diff set, so non-diff files are never scanned.
+    diffPaths ? { diffPaths } : {},
   );
 
   const startedAt = Date.now();

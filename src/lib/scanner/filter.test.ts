@@ -70,4 +70,32 @@ describe("filterRepoFiles", () => {
     const files: ScannerFile[] = Array.from({ length: 200 }, (_, i) => f(`src/api/route-${i}.ts`));
     expect(filterRepoFiles(files, { maxFiles: 50 })).toHaveLength(50);
   });
+
+  it("restricts to diffPaths when provided (diff mode)", () => {
+    const files: ScannerFile[] = [
+      f("src/auth/login.ts"),
+      f("src/api/payment.ts"),
+      f("src/api/users.ts"),
+    ];
+    const kept = filterRepoFiles(files, {
+      diffPaths: new Set(["src/auth/login.ts", "src/api/users.ts"]),
+    }).map((x) => x.path);
+    expect(kept).toContain("src/auth/login.ts");
+    expect(kept).toContain("src/api/users.ts");
+    expect(kept).not.toContain("src/api/payment.ts");
+  });
+
+  it("still applies extension/ignore rules within the diff set", () => {
+    const files: ScannerFile[] = [f("src/auth/login.ts"), f("docs/CHANGES.md")];
+    // README/markdown is in the diff but must still be dropped by the extension rule.
+    const kept = filterRepoFiles(files, {
+      diffPaths: new Set(["src/auth/login.ts", "docs/CHANGES.md"]),
+    }).map((x) => x.path);
+    expect(kept).toEqual(["src/auth/login.ts"]);
+  });
+
+  it("returns empty when the diff set matches no scannable files", () => {
+    const files: ScannerFile[] = [f("src/auth/login.ts")];
+    expect(filterRepoFiles(files, { diffPaths: new Set(["other/file.ts"]) })).toEqual([]);
+  });
 });
