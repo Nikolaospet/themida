@@ -115,3 +115,48 @@ Severity maps to SARIF levels (`CRITICAL`/`HIGH` → `error`, `MEDIUM` →
 `warning`, `LOW` → `note`), and each rule carries a `security-severity`
 score plus a `helpUri` pointing at the legal source, so Code Scanning
 ranks and links findings correctly.
+
+## 7. Diff-scoped scans on pull requests
+
+A full-repo scan on every PR is slow and spends tokens on files the PR never
+touched. Pass `--github-pr <number>` (or a local `--diff <base>..<head>` range)
+to analyse only the changed files — see
+[`docs/development/scripts.md`](../development/scripts.md#diff-scoped-scans---diff----github-pr)
+for the flag semantics.
+
+In a workflow, the PR number is available as `github.event.pull_request.number`:
+
+```yaml
+# .github/workflows/themida.yml
+name: Themida compliance scan
+on: [pull_request]
+
+permissions:
+  contents: read
+  security-events: write # required to upload SARIF
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm dev:scan --github-pr ${{ github.event.pull_request.number }} --format sarif --out themida.sarif
+        env:
+          # provide the scanner's GitHub App + LLM credentials as secrets
+          GITHUB_APP_ID: ${{ secrets.THEMIDA_APP_ID }}
+          GITHUB_APP_PRIVATE_KEY: ${{ secrets.THEMIDA_APP_PRIVATE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: themida.sarif
+```
+
+Token usage drops in proportion to how much of the repo the PR leaves
+untouched. A PR with no scannable changes exits cleanly without an LLM call, so
+the step stays green on docs-only or config-only PRs.
