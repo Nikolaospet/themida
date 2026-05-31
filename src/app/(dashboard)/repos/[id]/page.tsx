@@ -88,7 +88,9 @@ export default async function RepoDetailPage({ params, searchParams }: Props) {
           <form action={startScanFromForm} className="space-y-5">
             <input type="hidden" name="repoId" value={repo.id} />
             <fieldset>
-              <legend className="text-sm font-medium text-neutral-100">Compliance frameworks</legend>
+              <legend className="text-sm font-medium text-neutral-100">
+                Compliance frameworks
+              </legend>
               <p className="mt-1 text-xs text-neutral-500">
                 Choose which rule packs to run. All are selected by default.
               </p>
