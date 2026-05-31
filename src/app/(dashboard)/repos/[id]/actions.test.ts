@@ -33,6 +33,8 @@ vi.mock("@/lib/scanner/guardrails", () => ({
 }));
 vi.mock("@/lib/supabase/admin", () => ({ createSupabaseAdminClient: () => ({}) }));
 
+import { listFrameworks } from "@/lib/rules";
+
 import { startScan } from "./actions";
 
 describe("startScan", () => {
@@ -65,6 +67,11 @@ describe("startScan", () => {
       undefined,
     );
     expect(assertNoActiveScanForRepoMock).toHaveBeenCalledWith(expect.anything(), "repo-1");
+    expect(insertScanMock).toHaveBeenCalledWith({
+      repoId: "repo-1",
+      userId: "user-1",
+      frameworks: [...listFrameworks()],
+    });
     expect(triggerMock).toHaveBeenCalledWith({
       scanId: "scan-1",
       userId: "user-1",

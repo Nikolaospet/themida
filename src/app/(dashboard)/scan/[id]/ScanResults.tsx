@@ -7,6 +7,7 @@ import { ComplianceScore } from "@/components/dashboard/ComplianceScore";
 import { IssueCard, type IssueCardData } from "@/components/dashboard/IssueCard";
 import { SeverityBadge } from "@/components/dashboard/SeverityBadge";
 import { SEVERITY_TOKENS } from "@/lib/design/tokens";
+import { formatFrameworkLabels } from "@/lib/rules/framework-labels";
 import type { Severity } from "@/lib/rules/types";
 import type { Database } from "@/types/database";
 
@@ -93,10 +94,11 @@ export function ScanResults({ scan, issues, repoFullName, defaultBranch, commitS
   }, [issues, activeKey, fileQuery, sortBy]);
 
   if (issues.length === 0) {
-    return <EmptyCelebration repoFullName={repoFullName} />;
+    return <EmptyCelebration repoFullName={repoFullName} frameworks={scan.frameworks ?? []} />;
   }
 
   const duration = formatDuration(scan.started_at, scan.completed_at);
+  const frameworkLabel = formatFrameworkLabels(scan.frameworks ?? []);
 
   return (
     <div className="space-y-6">
@@ -108,6 +110,9 @@ export function ScanResults({ scan, issues, repoFullName, defaultBranch, commitS
               Scanned {scan.files_scanned ?? 0} files
               {duration && <> in {duration}</>}
             </p>
+            {frameworkLabel.length > 0 && (
+              <p className="text-sm text-neutral-500">Frameworks: {frameworkLabel}</p>
+            )}
             <div className="flex flex-wrap gap-2">
               {SEVS.map((s) => (
                 <button
@@ -174,7 +179,15 @@ export function ScanResults({ scan, issues, repoFullName, defaultBranch, commitS
   );
 }
 
-function EmptyCelebration({ repoFullName }: { repoFullName: string }) {
+function EmptyCelebration({
+  repoFullName,
+  frameworks,
+}: {
+  repoFullName: string;
+  frameworks: readonly string[];
+}) {
+  const frameworkLabel = formatFrameworkLabels(frameworks);
+
   return (
     <div className="rounded-2xl border border-emerald-900/40 bg-emerald-950/20 p-12 text-center">
       <p className="text-6xl" aria-hidden>
@@ -184,6 +197,9 @@ function EmptyCelebration({ repoFullName }: { repoFullName: string }) {
       <p className="mt-2 text-sm text-emerald-300/80">
         {repoFullName} scored 100 — you&apos;re in the top 5% of repos we&apos;ve scanned.
       </p>
+      {frameworkLabel.length > 0 && (
+        <p className="mt-2 text-xs text-emerald-400/70">Checked: {frameworkLabel}</p>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseFrameworksArg } from "./parse-frameworks";
+import { parseFrameworksArg, parseFrameworksSelection } from "./parse-frameworks";
 
 describe("parseFrameworksArg", () => {
   it("parses a single id", () => {
@@ -31,5 +31,15 @@ describe("parseFrameworksArg", () => {
   it("throws when the value is empty or only separators", () => {
     expect(() => parseFrameworksArg("")).toThrow(/no framework/iu);
     expect(() => parseFrameworksArg(" , ")).toThrow(/no framework/iu);
+  });
+});
+
+describe("parseFrameworksSelection", () => {
+  it("parses form checkbox values", () => {
+    expect(parseFrameworksSelection(["gdpr", "mica"])).toEqual(["gdpr", "mica"]);
+  });
+
+  it("throws when nothing is selected", () => {
+    expect(() => parseFrameworksSelection([])).toThrow(/no frameworks selected/iu);
   });
 });
