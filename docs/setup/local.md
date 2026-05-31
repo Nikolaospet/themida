@@ -53,7 +53,9 @@ TOKEN_ENCRYPTION_KEY=<64-hex-char string>
 pnpm dev
 ```
 
-Open <http://localhost:3000>.
+Open <http://localhost:3000>, connect a repository, then open it from the dashboard.
+On the repo page, choose which compliance frameworks to run (all are selected by
+default) and click **Run scan**.
 
 ## 4. Optional — GitHub App
 

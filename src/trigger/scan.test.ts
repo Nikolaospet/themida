@@ -38,6 +38,7 @@ describe("runScanJobBody", () => {
       owner: "octo",
       name: "demo",
       repoId: "repo-1",
+      frameworks: ["gdpr", "mica"],
     });
     fetchRepoFilesMock.mockResolvedValue({
       treeSha: "abc",
@@ -72,6 +73,9 @@ describe("runScanJobBody", () => {
 
     await runScanJobBody({ scanId: "scan-1", userId: "user-1", repoId: "repo-1" });
 
+    expect(runComplianceScanMock).toHaveBeenCalledWith(
+      expect.objectContaining({ frameworks: ["gdpr", "mica"] }),
+    );
     const phases = updateScanProgressMock.mock.calls.map((c) => (c[1] as { phase: string }).phase);
     expect(phases).toEqual(["fetching", "filtering", "recon", "deep_scan", "verifying", "done"]);
     expect(persistScanResultsMock).toHaveBeenCalledWith(
@@ -86,6 +90,7 @@ describe("runScanJobBody", () => {
       owner: "octo",
       name: "demo",
       repoId: "repo-2",
+      frameworks: ["gdpr"],
     });
     fetchRepoFilesMock.mockRejectedValue(new Error("github 401"));
     await expect(

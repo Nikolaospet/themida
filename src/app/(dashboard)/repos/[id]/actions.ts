@@ -4,6 +4,8 @@ import { notFound, redirect } from "next/navigation";
 
 import { requireUser } from "@/lib/auth/session";
 import { loadRepoForUser } from "@/lib/repos/access";
+import { type Framework, listFrameworks } from "@/lib/rules";
+import { parseFrameworksSelection } from "@/lib/rules/parse-frameworks";
 import {
   assertAndConsumeUserDailyCap,
   assertGlobalSpendUnderCap,
@@ -13,7 +15,10 @@ import { insertScan } from "@/lib/scanner/persist";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { runScanJob } from "@/trigger/scan";
 
-export async function startScan(repoId: string): Promise<{ scanId: string }> {
+export async function startScan(
+  repoId: string,
+  frameworks: readonly Framework[] = listFrameworks(),
+): Promise<{ scanId: string }> {
   const user = await requireUser();
   const repo = await loadRepoForUser(repoId, user.id);
   if (!repo) notFound();
@@ -30,7 +35,7 @@ export async function startScan(repoId: string): Promise<{ scanId: string }> {
   const scan = await insertScan({
     repoId,
     userId: user.id,
-    frameworks: ["gdpr"],
+    frameworks: [...frameworks],
   });
 
   await runScanJob.trigger({
@@ -55,8 +60,19 @@ export async function startScanFromForm(formData: FormData): Promise<void> {
     redirect("/dashboard?scan_error=invalid_repo");
   }
 
+  const rawFrameworks = formData
+    .getAll("frameworks")
+    .filter((value): value is string => typeof value === "string");
+
+  let frameworks: Framework[];
   try {
-    const { scanId } = await startScan(repoId);
+    frameworks = parseFrameworksSelection(rawFrameworks);
+  } catch {
+    redirect(`/repos/${repoId}?scan_error=invalid_frameworks`);
+  }
+
+  try {
+    const { scanId } = await startScan(repoId, frameworks);
     redirect(`/scan/${scanId}`);
   } catch (err) {
     // Next's redirect() throws a special error — let it propagate.
