@@ -43,7 +43,9 @@ export async function loadFixture(fixtureName: string): Promise<FixtureLoadResul
 
   const files: ScannerFile[] = [];
   for (const absPath of filePaths) {
-    const relative = path.relative(codeDir, absPath);
+    // Normalise to POSIX separators so fixture paths match the forward-slash
+    // `file_path` values in manifests (and the scanner's own paths) on Windows.
+    const relative = path.relative(codeDir, absPath).split(path.sep).join("/");
     const content = await readFile(absPath, "utf8");
     const fileStat = await stat(absPath);
     files.push({ path: relative, size: fileStat.size, content });
