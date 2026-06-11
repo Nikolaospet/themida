@@ -22,6 +22,14 @@ interface Props {
   defaultBranch: string;
   /** Optional — passed through to IssueCard for stable GitHub deep-links. */
   commitSha?: string | null;
+  /** Aggregated LLM usage for this scan; the metadata line is hidden when zero. */
+  usage?: { tokens: number; costCents: number };
+}
+
+function formatCost(costCents: number): string {
+  if (costCents <= 0) return "<$0.01";
+  const dollars = costCents / 100;
+  return dollars < 0.01 ? "<$0.01" : `~$${dollars.toFixed(2)}`;
 }
 
 function formatDuration(start: string | null, end: string | null): string | null {
@@ -42,7 +50,14 @@ function parseSeverities(raw: string | null): Severity[] {
   return parts.length > 0 ? parts : SEVS;
 }
 
-export function ScanResults({ scan, issues, repoFullName, defaultBranch, commitSha }: Props) {
+export function ScanResults({
+  scan,
+  issues,
+  repoFullName,
+  defaultBranch,
+  commitSha,
+  usage,
+}: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -112,6 +127,11 @@ export function ScanResults({ scan, issues, repoFullName, defaultBranch, commitS
             </p>
             {frameworkLabel.length > 0 && (
               <p className="text-sm text-neutral-500">Frameworks: {frameworkLabel}</p>
+            )}
+            {usage && usage.tokens > 0 && (
+              <p className="text-sm text-neutral-500 tabular-nums">
+                {usage.tokens.toLocaleString("en-US")} tokens · {formatCost(usage.costCents)} est.
+              </p>
             )}
             <div className="flex flex-wrap gap-2">
               {SEVS.map((s) => (
