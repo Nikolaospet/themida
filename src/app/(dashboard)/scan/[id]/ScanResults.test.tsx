@@ -89,6 +89,33 @@ describe("ScanResults", () => {
     expect(screen.getAllByText("1").length).toBeGreaterThanOrEqual(2);
   });
 
+  it("shows token and cost metadata when usage is provided", () => {
+    const { container } = render(
+      <ScanResults
+        scan={baseScan}
+        issues={[issue1, issue2]}
+        repoFullName="acme/x"
+        defaultBranch="main"
+        usage={{ tokens: 123456, costCents: 42 }}
+      />,
+    );
+    expect(container.textContent).toContain("123,456 tokens");
+    expect(container.textContent).toContain("~$0.42 est.");
+  });
+
+  it("hides usage metadata when token count is zero", () => {
+    render(
+      <ScanResults
+        scan={baseScan}
+        issues={[issue1, issue2]}
+        repoFullName="acme/x"
+        defaultBranch="main"
+        usage={{ tokens: 0, costCents: 0 }}
+      />,
+    );
+    expect(screen.queryByText(/tokens/i)).not.toBeInTheDocument();
+  });
+
   it("issue count message uses singular/plural correctly", () => {
     render(
       <ScanResults scan={baseScan} issues={[issue1]} repoFullName="acme/x" defaultBranch="main" />,

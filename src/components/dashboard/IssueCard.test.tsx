@@ -1,8 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { toast } from "sonner";
+import { describe, expect, it, vi } from "vitest";
 
 import { IssueCard, type IssueCardData } from "./IssueCard";
+
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 const mockIssue: IssueCardData = {
   id: "issue-1",
@@ -74,6 +77,30 @@ describe("IssueCard", () => {
       "href",
       "https://github.com/acme/x/blob/main/src/auth/login.ts",
     );
+  });
+
+  it("copies the suggested fix to the clipboard", async () => {
+    // userEvent.setup() installs a working clipboard stub on navigator.
+    const user = userEvent.setup();
+    render(<IssueCard issue={mockIssue} repoFullName="acme/x" defaultBranch="main" />);
+    await user.click(screen.getByRole("button", { name: /password hashed/i }));
+    await user.click(screen.getByRole("button", { name: /copy fix/i }));
+    expect(await navigator.clipboard.readText()).toBe(mockIssue.fix_code);
+    expect(toast.success).toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: /copied/i })).toBeInTheDocument();
+  });
+
+  it("shows no copy button when there is no fix", async () => {
+    const user = userEvent.setup();
+    render(
+      <IssueCard
+        issue={{ ...mockIssue, fix_code: null }}
+        repoFullName="acme/x"
+        defaultBranch="main"
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: /password hashed/i }));
+    expect(screen.queryByRole("button", { name: /copy fix/i })).not.toBeInTheDocument();
   });
 
   it("hides optional sections when data missing", async () => {
