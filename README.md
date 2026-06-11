@@ -27,7 +27,8 @@ developers on what "compliant" looks like in code, and keep reviews consistent.
 The project is self-hosted: you supply the LLM API key; there is no Themida
 cloud. Treat output as input to human review, not a certified audit.
 
-**Alpha** — GDPR and EU AI Act packs work end-to-end; expect rough edges.
+**Alpha** — six rule packs work end-to-end (GDPR, EU AI Act, MiCA, HIPAA,
+OWASP Top 10, PCI DSS); expect rough edges.
 [Open an issue](https://github.com/Nikolaospet/themida/issues) or see
 [Contributing](./CONTRIBUTING.md).
 
@@ -67,10 +68,19 @@ cd themida
 pnpm install
 cp .env.example .env.local
 # Set LLM_PROVIDER + ANTHROPIC_API_KEY or OPENAI_API_KEY
-pnpm dev:scan
+pnpm dev:scan --path .            # scan this clone, or any local directory
 ```
 
-Requires **Node.js 22+**, **pnpm 10+**, and an LLM API key.
+Restrict frameworks or write a SARIF report:
+
+```bash
+pnpm dev:scan --path ./my-repo --frameworks gdpr,owasp
+pnpm dev:scan --path ./my-repo --format sarif --out themida.sarif
+```
+
+Requires **Node.js 22+**, **pnpm 10+**, and an LLM API key. `--path` scans a
+local directory with no Supabase or GitHub App; omit it to scan the most
+recently connected repo (needs the full web stack below).
 
 Full web UI, database, and repo connection:
 [Local setup](./docs/setup/local.md).
@@ -91,8 +101,8 @@ Full web UI, database, and repo connection:
 
 ## Frameworks
 
-GDPR and EU AI Act are shipped (five rules each). HIPAA, SOC 2, ISO 27001,
-OWASP, and PCI DSS are planned — contributions welcome.
+Six packs ship, five rules each: GDPR, EU AI Act, MiCA, HIPAA, OWASP Top 10,
+and PCI DSS. SOC 2 and ISO 27001 are planned — contributions welcome.
 
 Full table: [Frameworks](./docs/reference/frameworks.md).
 

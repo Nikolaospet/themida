@@ -16,11 +16,30 @@ Run from the repository root.
 | `pnpm db:reset` | Drop and reapply migrations |
 | `pnpm db:types` | Regenerate `src/types/database.ts` |
 | `pnpm dev:fetch` | Inspect file fetcher for the latest repo |
-| `pnpm dev:scan` | Run full scan pipeline for the latest repo |
+| `pnpm dev:scan --path ./repo` | Scan a local directory (no Supabase / GitHub App) |
+| `pnpm dev:scan` | Run full scan pipeline for the latest connected repo |
 | `pnpm dev:scan --frameworks gdpr,mica` | Restrict the scan to selected framework packs |
 | `pnpm evals:run` | Accuracy evals under `evals/repos/` |
 | `pnpm trigger:dev` | Trigger.dev local worker |
 | `pnpm secretlint` | Scan working tree for committed secrets |
+
+## Scanning a local directory
+
+`pnpm dev:scan --path <dir>` walks a local directory and runs the full
+fetch → filter → analyse → verify pipeline in-process — no Supabase row and no
+GitHub App installation required, only an LLM key. Dependency, build, and VCS
+directories (`node_modules`, `.git`, `.next`, `dist`, …) and binary/oversized
+files are skipped automatically. Combine with `--frameworks`, `--format sarif`,
+and `--out`:
+
+```bash
+pnpm dev:scan --path .                                  # scan this clone
+pnpm dev:scan --path ./my-repo --frameworks gdpr,owasp  # subset of packs
+pnpm dev:scan --path ./my-repo --format sarif --out themida.sarif
+```
+
+Without `--path`, `dev:scan` pulls files from the GitHub API for the most
+recently connected repo in `public.repos` (needs the full web stack).
 
 ## Selecting frameworks for `dev:scan`
 

@@ -89,10 +89,22 @@ There is no central Themida server; self-hosting is the full product.
 
 ## CLI scan (no web UI)
 
-After connecting at least one repo (via UI or Supabase Studio):
+Two modes:
+
+**Local directory (`--path`)** — no Supabase, no GitHub App, just an LLM key.
+This is the fastest way to evaluate Themida or develop rule packs:
+
+```bash
+pnpm dev:scan --path ./my-repo                       # scan a local clone
+pnpm dev:scan --path . --frameworks gdpr,owasp       # restrict packs
+pnpm dev:scan --path . --format sarif --out out.sarif # SARIF report
+```
+
+**Connected repo** — pulls files from the GitHub API for the most recent repo
+in `public.repos` (needs the full web stack and a connected repo):
 
 ```bash
 pnpm dev:scan
 ```
 
-Uses the most recent repo in `public.repos`. See [Troubleshooting](../troubleshooting.md) if you see "no repos".
+See [Troubleshooting](../troubleshooting.md) if you see "No connected repo found".
