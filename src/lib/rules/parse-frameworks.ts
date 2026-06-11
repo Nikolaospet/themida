@@ -27,3 +27,14 @@ export function parseFrameworksArg(value: string): Framework[] {
 
   return selected;
 }
+
+/**
+ * Parse framework ids submitted from a multi-select form (`name="frameworks"`).
+ * Throws when nothing is selected or any id is unknown.
+ */
+export function parseFrameworksSelection(values: readonly string[]): Framework[] {
+  if (values.length === 0) {
+    throw new Error(`no frameworks selected. Valid ids: ${listFrameworks().join(", ")}`);
+  }
+  return parseFrameworksArg(values.join(","));
+}

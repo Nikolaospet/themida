@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import type { IssueCardData } from "@/components/dashboard/IssueCard";
+import { resolveScanFrameworks } from "@/lib/scanner/persist";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import { startScan } from "../../repos/[id]/actions";
@@ -73,9 +74,10 @@ export default async function ScanPage({ params }: Props) {
   }
 
   if (scan.status === "failed") {
+    const frameworksForRetry = resolveScanFrameworks(scan.frameworks);
     async function retryScan(repoId: string) {
       "use server";
-      const { scanId: newId } = await startScan(repoId);
+      const { scanId: newId } = await startScan(repoId, frameworksForRetry);
       redirect(`/scan/${newId}`);
     }
     return (

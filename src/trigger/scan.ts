@@ -31,7 +31,7 @@ export async function runScanJobBody(payload: ScanJobPayload): Promise<void> {
 
     const result = await runComplianceScan({
       files: filtered,
-      frameworks: ["gdpr"],
+      frameworks: [...ctx.frameworks],
       scanId: payload.scanId,
       userId: payload.userId,
       onPhase: (phase, done, total) => {
