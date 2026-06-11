@@ -9,6 +9,7 @@ const MESSAGES: Record<string, string> = {
   kill_switch: "Themida is at capacity for today. Please try again later.",
   already_running: "A scan is already running on this repo.",
   invalid_repo: "Invalid repository.",
+  invalid_frameworks: "Select at least one compliance framework.",
   unknown: "Couldn't start the scan. Please try again.",
 };
 

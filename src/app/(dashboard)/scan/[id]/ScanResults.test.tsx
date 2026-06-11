@@ -71,6 +71,7 @@ describe("ScanResults", () => {
     render(<ScanResults scan={baseScan} issues={[]} repoFullName="acme/x" defaultBranch="main" />);
     expect(screen.getByText(/no compliance issues found/i)).toBeInTheDocument();
     expect(screen.getByText(/top 5%/i)).toBeInTheDocument();
+    expect(screen.getByText(/checked: gdpr/i)).toBeInTheDocument();
   });
 
   it("renders compliance score and severity counts", () => {

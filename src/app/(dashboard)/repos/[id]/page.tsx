@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { FRAMEWORK_REGISTRY, listFrameworks } from "@/lib/rules";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import { startScanFromForm } from "./actions";
@@ -54,6 +55,10 @@ export default async function RepoDetailPage({ params, searchParams }: Props) {
 
   const scanList: ScanHistoryRow[] = scans ?? [];
   const activeScan = scanList.find((s) => s.status === "pending" || s.status === "running");
+  const frameworkOptions = listFrameworks().map((id) => ({
+    id,
+    label: FRAMEWORK_REGISTRY[id].meta.displayName,
+  }));
 
   return (
     <div className="space-y-8">
@@ -75,9 +80,37 @@ export default async function RepoDetailPage({ params, searchParams }: Props) {
           >
             Scan in progress — view live →
           </Link>
-        ) : (
-          <form action={startScanFromForm}>
+        ) : null}
+      </header>
+
+      {!activeScan && (
+        <section className="rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+          <form action={startScanFromForm} className="space-y-5">
             <input type="hidden" name="repoId" value={repo.id} />
+            <fieldset>
+              <legend className="text-sm font-medium text-neutral-100">
+                Compliance frameworks
+              </legend>
+              <p className="mt-1 text-xs text-neutral-500">
+                Choose which rule packs to run. All are selected by default.
+              </p>
+              <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-3">
+                {frameworkOptions.map(({ id, label }) => (
+                  <li key={id}>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm text-neutral-300">
+                      <input
+                        type="checkbox"
+                        name="frameworks"
+                        value={id}
+                        defaultChecked
+                        className="size-4 rounded border-neutral-600 bg-neutral-950 text-white focus:ring-neutral-500"
+                      />
+                      {label}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </fieldset>
             <button
               type="submit"
               className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-100"
@@ -85,8 +118,8 @@ export default async function RepoDetailPage({ params, searchParams }: Props) {
               Run scan
             </button>
           </form>
-        )}
-      </header>
+        </section>
+      )}
 
       <section className="space-y-3">
         <h2 className="text-lg font-medium">Scan history</h2>

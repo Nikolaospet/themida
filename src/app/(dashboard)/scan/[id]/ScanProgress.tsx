@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { formatFrameworkLabels } from "@/lib/rules/framework-labels";
 import { parseProgress, type ScanPhase } from "@/lib/scanner/progress";
 import type { Database } from "@/types/database";
 
@@ -56,6 +57,7 @@ export function ScanProgress({ scanId, initialScan, repoFullName }: Props) {
   const progress = parseProgress(scan.progress);
   const phase = progress.phase;
   const currentIdx = phase === "queued" ? -1 : PHASES.findIndex((p) => p.key === phase);
+  const frameworkLabel = formatFrameworkLabels(scan.frameworks ?? []);
 
   return (
     <div className="space-y-8">
@@ -64,6 +66,9 @@ export function ScanProgress({ scanId, initialScan, repoFullName }: Props) {
         <p className="mt-1 text-sm text-neutral-400 tabular-nums">
           Started {formatElapsed(scan.started_at)}
         </p>
+        {frameworkLabel.length > 0 && (
+          <p className="mt-1 text-sm text-neutral-500">Frameworks: {frameworkLabel}</p>
+        )}
       </header>
 
       <Stepper currentIdx={currentIdx} />

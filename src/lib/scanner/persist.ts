@@ -1,3 +1,4 @@
+import { type Framework, isFramework, listFrameworks } from "@/lib/rules";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 import type { ScanResult, VerifiedFinding } from "./findings";
@@ -8,13 +9,29 @@ export type ScanContext = {
   readonly owner: string;
   readonly name: string;
   readonly repoId: string;
+  readonly frameworks: readonly Framework[];
 };
+
+/** Normalize stored scan.frameworks; fall back to all shipped packs when empty. */
+export function resolveScanFrameworks(raw: readonly string[] | null | undefined): Framework[] {
+  if (!raw || raw.length === 0) return [...listFrameworks()];
+
+  const selected: Framework[] = [];
+  for (const id of raw) {
+    const normalized = id.trim().toLowerCase();
+    if (isFramework(normalized) && !selected.includes(normalized)) {
+      selected.push(normalized);
+    }
+  }
+
+  return selected.length > 0 ? selected : [...listFrameworks()];
+}
 
 export async function loadScanContext(scanId: string): Promise<ScanContext> {
   const admin = createSupabaseAdminClient();
   const { data, error } = await admin
     .from("scans")
-    .select("repo:repos!inner(id, owner, name, installation_id)")
+    .select("frameworks, repo:repos!inner(id, owner, name, installation_id)")
     .eq("id", scanId)
     .single();
   if (error || !data) {
@@ -32,6 +49,7 @@ export async function loadScanContext(scanId: string): Promise<ScanContext> {
     owner: repo.owner,
     name: repo.name,
     repoId: repo.id,
+    frameworks: resolveScanFrameworks(data.frameworks),
   };
 }
 
