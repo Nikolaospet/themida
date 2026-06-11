@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import { SeverityBadge } from "@/components/dashboard/SeverityBadge";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-const FRAMEWORKS_SHIPPED = ["GDPR", "EU AI Act"];
-const FRAMEWORKS_OPEN = ["HIPAA", "SOC 2", "ISO 27001", "OWASP Top 10", "PCI DSS"];
+const FRAMEWORKS_SHIPPED = ["GDPR", "EU AI Act", "MiCA", "HIPAA", "OWASP Top 10", "PCI DSS"];
+const FRAMEWORKS_OPEN = ["SOC 2", "ISO 27001"];
 
 const GITHUB_URL = "https://github.com/Nikolaospet/themida";
 
@@ -35,8 +35,8 @@ export default async function LandingPage() {
           </p>
           <p className="mt-6 max-w-xl text-base text-neutral-400">
             Themida is a personal open-source project exploring LLM-driven compliance scanning.
-            Point it at a GitHub repo and it returns every GDPR / EU AI Act issue with the file, the
-            line, the legal article, and the code that fixes it.
+            Point it at a GitHub repo and it returns every compliance issue with the file, the line,
+            the legal article, and the code that fixes it.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -145,7 +145,7 @@ pnpm install
 # pick one provider (see docs/setup/configuration.md):
 export LLM_PROVIDER=anthropic
 export ANTHROPIC_API_KEY=sk-ant-…
-pnpm themida scan ./path/to/repo`}
+pnpm dev:scan --path ./path/to/repo`}
         </pre>
 
         <p className="mt-4 text-xs text-neutral-500">
@@ -195,8 +195,8 @@ pnpm themida scan ./path/to/repo`}
             <span className="font-mono text-xs text-neutral-500">02</span>
             <h3 className="mt-2 text-lg font-semibold">Pick frameworks</h3>
             <p className="mt-2 text-sm text-neutral-400">
-              GDPR and the EU AI Act ship today. The rest are open issues — write a rule pack and
-              we&apos;ll merge it.
+              Six packs ship today: GDPR, EU AI Act, MiCA, HIPAA, OWASP, and PCI DSS. More are open
+              issues — write a rule pack and we&apos;ll merge it.
             </p>
           </li>
           <li className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
