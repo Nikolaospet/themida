@@ -147,6 +147,7 @@ export function ScanResults({
               ))}
             </div>
           </div>
+          <ExportLinks scanId={scan.id} />
         </div>
       </div>
 
@@ -195,6 +196,21 @@ export function ScanResults({
           No issues match your filters. Try widening the severity selection.
         </p>
       )}
+    </div>
+  );
+}
+
+function ExportLinks({ scanId }: { scanId: string }) {
+  const linkClass =
+    "inline-flex items-center gap-1 rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-200 transition hover:border-neutral-500 hover:text-neutral-50";
+  return (
+    <div className="flex flex-row gap-2 sm:flex-col sm:self-start">
+      <a href={`/api/scan/${scanId}/sarif`} download className={linkClass}>
+        Download SARIF
+      </a>
+      <a href={`/api/scan/${scanId}/pdf`} download className={linkClass}>
+        Download PDF
+      </a>
     </div>
   );
 }
