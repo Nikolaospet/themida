@@ -39,8 +39,8 @@ export default async function DashboardPage() {
       {repoList.length === 0 ? (
         <div className="rounded-xl border border-dashed border-neutral-800 bg-neutral-950 p-12 text-center">
           <p className="text-sm text-neutral-400">
-            Once you connect a repository, you&apos;ll be able to scan it for GDPR and EU AI Act
-            compliance issues here.
+            Once you connect a repository, you&apos;ll be able to scan it for GDPR, EU AI Act, MiCA,
+            HIPAA, OWASP, and PCI DSS compliance issues here.
           </p>
         </div>
       ) : (
