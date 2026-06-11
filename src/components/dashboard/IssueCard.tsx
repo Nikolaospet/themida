@@ -2,6 +2,7 @@
 
 import * as Collapsible from "@radix-ui/react-collapsible";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import type { Severity } from "@/lib/rules/types";
 
@@ -110,13 +111,16 @@ export function IssueCard({ issue, repoFullName, commitSha, defaultBranch }: Pro
 
             {issue.fix_code && (
               <section>
-                <div className="mb-2 flex items-center justify-between">
+                <div className="mb-2 flex items-center justify-between gap-3">
                   <p className="text-xs font-medium tracking-wider text-neutral-500 uppercase">
                     Suggested fix
                   </p>
-                  {issue.fix_time_estimate && (
-                    <p className="text-xs text-neutral-500">{issue.fix_time_estimate}</p>
-                  )}
+                  <div className="flex items-center gap-3">
+                    {issue.fix_time_estimate && (
+                      <p className="text-xs text-neutral-500">{issue.fix_time_estimate}</p>
+                    )}
+                    <CopyFixButton fixCode={issue.fix_code} />
+                  </div>
                 </div>
                 {issue.fix_description && (
                   <p className="mb-2 text-neutral-300">{issue.fix_description}</p>
@@ -130,5 +134,30 @@ export function IssueCard({ issue, repoFullName, commitSha, defaultBranch }: Pro
         </Collapsible.Content>
       </div>
     </Collapsible.Root>
+  );
+}
+
+function CopyFixButton({ fixCode }: { fixCode: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(fixCode);
+      setCopied(true);
+      toast.success("Fix copied to clipboard");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Couldn't copy — select the code and copy manually");
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      className="inline-flex items-center gap-1 rounded-md border border-neutral-700 px-2 py-1 text-xs text-neutral-300 transition hover:border-neutral-500 hover:text-neutral-100"
+    >
+      {copied ? "Copied ✓" : "Copy fix"}
+    </button>
   );
 }

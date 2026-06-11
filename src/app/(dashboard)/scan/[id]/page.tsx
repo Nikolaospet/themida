@@ -47,6 +47,19 @@ export default async function ScanPage({ params }: Props) {
       )
       .eq("scan_id", scanId);
 
+    const { data: usageRows } = await supabase
+      .from("llm_api_calls")
+      .select("input_tokens, output_tokens, cost_cents")
+      .eq("scan_id", scanId);
+
+    const usage = (usageRows ?? []).reduce(
+      (acc, row) => ({
+        tokens: acc.tokens + row.input_tokens + row.output_tokens,
+        costCents: acc.costCents + row.cost_cents,
+      }),
+      { tokens: 0, costCents: 0 },
+    );
+
     const issues: IssueCardData[] = (issuesRaw ?? []).map((row) => ({
       id: row.id,
       severity: row.severity,
@@ -69,6 +82,7 @@ export default async function ScanPage({ params }: Props) {
         issues={issues}
         repoFullName={repo.full_name}
         defaultBranch={repo.default_branch}
+        usage={usage}
       />
     );
   }
