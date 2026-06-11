@@ -55,6 +55,17 @@ pnpm dev:scan --frameworks gdpr,mica     # GDPR + MiCA
 Unknown ids fail fast and exit non-zero with the list of valid ids. Valid ids
 come from [`src/lib/rules/frameworks/registry.ts`](../../src/lib/rules/frameworks/registry.ts).
 
+## Exporting scan results
+
+From the CLI, write a SARIF file with `pnpm dev:scan --format sarif --out
+<file>` (see above) and upload it in CI with `github/codeql-action/upload-sarif`.
+
+From the dashboard, a completed scan at `/scan/[id]` offers **Download SARIF**
+and **Download PDF** buttons. These hit the authenticated routes
+`/api/scan/[id]/sarif` and `/api/scan/[id]/pdf`, which re-check that the scan
+belongs to the signed-in user and return a 404 otherwise. SARIF reuses
+`toSarifString`; the PDF reuses the `ReportPDF` renderer.
+
 ## Before a pull request
 
 ```bash

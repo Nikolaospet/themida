@@ -96,6 +96,25 @@ describe("ScanResults", () => {
     expect(screen.getByText("1 issue")).toBeInTheDocument();
   });
 
+  it("offers SARIF and PDF download links for the scan", () => {
+    render(
+      <ScanResults
+        scan={baseScan}
+        issues={[issue1, issue2]}
+        repoFullName="acme/x"
+        defaultBranch="main"
+      />,
+    );
+    expect(screen.getByRole("link", { name: /download sarif/i })).toHaveAttribute(
+      "href",
+      "/api/scan/scan-1/sarif",
+    );
+    expect(screen.getByRole("link", { name: /download pdf/i })).toHaveAttribute(
+      "href",
+      "/api/scan/scan-1/pdf",
+    );
+  });
+
   it("hides file search until issues > 20", () => {
     render(
       <ScanResults
