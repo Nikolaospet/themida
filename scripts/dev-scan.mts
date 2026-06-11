@@ -1,18 +1,20 @@
 /* eslint-disable no-console */
 import { writeFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 
-import { fetchRepoFiles } from "@/lib/github/fetcher";
 import { listFrameworks } from "@/lib/rules";
 import { parseFrameworksArg } from "@/lib/rules/parse-frameworks";
 import { runComplianceScan } from "@/lib/scanner";
 import { toSarifString } from "@/lib/scanner/exporters/sarif";
 import { filterRepoFiles } from "@/lib/scanner/filter";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { walkLocalFiles } from "@/lib/scanner/local-files";
+import type { ScannerFile } from "@/lib/scanner/types";
 
 async function main(): Promise<void> {
   const { values } = parseArgs({
     options: {
+      path: { type: "string" },
       frameworks: { type: "string" },
       format: { type: "string" },
       out: { type: "string" },
@@ -29,31 +31,50 @@ async function main(): Promise<void> {
   // to a validated subset (parseFrameworksArg throws on unknown ids).
   const frameworks = values.frameworks ? parseFrameworksArg(values.frameworks) : listFrameworks();
 
-  const admin = createSupabaseAdminClient();
+  // Source the file list either from a local directory (`--path`, no Supabase or
+  // GitHub App needed) or from the most recently connected repo via the GitHub API.
+  let files: ScannerFile[];
+  let totalFiles: number;
+  let label: string;
 
-  const { data: repo, error } = await admin
-    .from("repos")
-    .select("id, owner, name, full_name, installation_id")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  if (values.path) {
+    const root = resolve(values.path);
+    files = walkLocalFiles(root);
+    totalFiles = files.length;
+    label = `local path ${root}`;
+  } else {
+    // Dynamic imports keep Supabase/GitHub (and their required env vars) out of
+    // the `--path` code path, so a CLI scan needs nothing but an LLM key.
+    const { fetchRepoFiles } = await import("@/lib/github/fetcher");
+    const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
 
-  if (error) throw error;
-  if (!repo || !repo.installation_id) {
-    console.error("No connected repo found. Connect one via /repos/connect first.");
-    process.exit(1);
+    const admin = createSupabaseAdminClient();
+    const { data: repo, error } = await admin
+      .from("repos")
+      .select("id, owner, name, full_name, installation_id")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!repo || !repo.installation_id) {
+      console.error(
+        "No connected repo found. Connect one via /repos/connect first, or scan a local clone with --path ./your-repo.",
+      );
+      process.exit(1);
+    }
+
+    const fetched = await fetchRepoFiles(repo.installation_id, repo.owner, repo.name, {
+      cacheRepoId: repo.id,
+    });
+    files = fetched.files.map((f) => ({ path: f.path, size: f.size, content: f.content }));
+    totalFiles = fetched.files.length;
+    label = `${repo.full_name} (installation ${repo.installation_id})`;
   }
 
-  console.log(
-    `Scanning ${repo.full_name} (installation ${repo.installation_id}) — frameworks: ${frameworks.join(", ")}...\n`,
-  );
+  console.log(`Scanning ${label} — frameworks: ${frameworks.join(", ")}...\n`);
 
-  const fetched = await fetchRepoFiles(repo.installation_id, repo.owner, repo.name, {
-    cacheRepoId: repo.id,
-  });
-  const filtered = filterRepoFiles(
-    fetched.files.map((f) => ({ path: f.path, size: f.size, content: f.content })),
-  );
+  const filtered = filterRepoFiles(files);
 
   const startedAt = Date.now();
   const result = await runComplianceScan({
@@ -63,7 +84,7 @@ async function main(): Promise<void> {
   const duration = Date.now() - startedAt;
 
   console.log("=== Scan stats ===");
-  console.log(`  Filtered files:   ${filtered.length} / ${fetched.files.length}`);
+  console.log(`  Filtered files:   ${filtered.length} / ${totalFiles}`);
   console.log(`  Files scanned:    ${result.stats.filesScanned}`);
   console.log(`  Chunks:           ${result.stats.chunks}`);
   console.log(`  Findings (raw):   ${result.stats.findingsRaw}`);
